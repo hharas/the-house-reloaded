@@ -235,7 +235,7 @@ def promote():
     """Endpoint that promotes a user to admin if he has an admin key"""
     if current_user.is_authenticated:
         if request.args.get("key") == os.getenv("THR_ADMIN_KEY"):
-            user = User.query.filter_by(id=current_user.id)
+            user = User.query.filter_by(id=current_user.id).first()
             user.role = "admin"
 
             db.session.add(user)
