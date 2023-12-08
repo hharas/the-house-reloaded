@@ -320,6 +320,7 @@ def settings():
 
     if form.validate_on_submit():
         user = User.query.filter_by(id=current_user.id).first()
+        profile_picture_filename = ""
 
         if form.bio.data != current_user.bio:
             user.bio = form.bio.data.strip(
@@ -339,7 +340,7 @@ def settings():
 
         db.session.commit()
 
-        if profile_picture_filename:
+        if len(profile_picture_filename) > 0:
             save_to_uploads(
                 form.profile_picture_file.data, profile_picture_filename)
 
@@ -405,8 +406,7 @@ def create_category():
         db.session.add(new_category)
         db.session.commit()
 
-        return redirect(request.referrer) if request.referrer is not None \
-            else redirect(url_for("index"))
+        return redirect(url_for("index"))
 
     if current_user.is_authenticated:
         if current_user.role == "admin":

@@ -26,7 +26,7 @@ current_user.id == thread.creator %} <a href="#">delete thread</a> | {% endif %}
   config["PREVIEWABLE_EXTENSIONS"] %}
   <embed
     src="{{ url_for('uploads', filename=thread.attachment_filename) }}"
-    style="height: 400px; margin-top: 5px"
+    style="max-height: 400px; margin-top: 5px"
   />
   {% else %}
   <a href="{{ url_for('uploads', filename=thread.attachment_filename) }}"
