@@ -308,6 +308,9 @@ def logout():
 def settings():
     """Account settings page"""
 
+    if not current_user.is_authenticated:
+        return render_template("403.html"), 403
+
     class SettingsForm(FlaskForm):
         """Settings form class"""
         bio = StringField(
@@ -345,9 +348,6 @@ def settings():
                 form.profile_picture_file.data, profile_picture_filename)
 
         return redirect(request.args.get("referer", url_for("index")))
-
-    if not current_user.is_authenticated:
-        return render_template("403.html"), 403
 
     return render_template(
         "settings.html",
