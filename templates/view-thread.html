@@ -1,0 +1,55 @@
+{% extends "base.html" %} {% block title %}{{ thread.title }}{% endblock %} {%
+block leftheader %} >
+<a href="/{{ category.title }}">{{ category.title }}/</a> {% endblock %} {%
+block rightheader %} {% if current_user.is_authenticated %} {% if
+current_user.role == "admin" or (current_user.role == "moderator" and
+User.query.filter_by(id=thread.creator).first().role != "admin") or
+current_user.id == thread.creator %} <a href="#">delete thread</a> | {% endif %}
+<a href="/{{ category.title }}/new">create thread</a> | {% endif %} {% endblock
+%} {% block main %}
+<div class="main">
+  <h4 style="margin-top: 5px">{{ thread.title }}</h4>
+  <p style="font-size: 13px">
+    created by
+    <a
+      href="{{ url_for('view_user', username=User.query.filter_by(id=thread.creator).first().username) }}"
+      >{{ User.query.filter_by(id=thread.creator).first().username }}</a
+    >
+    at {{ thread.creation_date }} | Viewed {{ thread.views }} {% if thread.views
+    == 1 %} time {% else %} times {% endif %}
+  </p>
+  <br />
+  {% if thread.content %}
+  <p>{{ thread.content|render_content|safe }}</p>
+  {% endif %} {% if thread.attachment_filename %} <br />
+  {% if thread.attachment_filename.split(".")|last in
+  config["PREVIEWABLE_EXTENSIONS"] %}
+  <embed
+    src="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+    style="height: 400px; margin-top: 5px"
+  />
+  {% else %}
+  <a href="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+    >{{ thread.attachment_filename }}</a
+  >
+  {% endif %} {% endif %}
+  <hr />
+  {% if not current_user.is_authenticated %}
+  <a href="{{ url_for('login') + '?referer=' + request.path }}">login</a> in
+  order to post replies. {% else %}
+  <form
+    action="{{ url_for('create_post', cat_title=category.title, thread_id=thread.id) }}"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    {{ form.hidden_tag() }} {{ form.content }}
+    <br />
+    {{ form.file }}
+    <br />
+    {{ form.submit }}
+  </form>
+  {% endif %} {% if rendered_posts|trim|length > 0 %}
+  <hr />
+  {{ rendered_posts|safe }} {% endif %}
+</div>
+{% endblock %}

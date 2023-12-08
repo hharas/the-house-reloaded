@@ -1,0 +1,22 @@
+{% extends "base.html" %} {% block title %}Settings{% endblock %} {% block main
+%}
+<div class="main">
+  <h3>Account Settings</h3>
+  <form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }} bio: {{ form.bio }}
+    <br />
+    profile picture: {{ form.profile_picture_file }}
+    <br />
+    current profile picture: {% if current_user.picture_filename %}
+    <br />
+    <img
+      src="{{ url_for('uploads', filename=current_user.picture_filename) }}"
+      style="max-height: 300px"
+    />
+    {% else %} <b>not set!</b> {% endif %}
+    <br />
+    <br />
+    {{ form.submit }}
+  </form>
+</div>
+{% endblock %}

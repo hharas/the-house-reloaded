@@ -1,0 +1,33 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block main %}
+<div class="main">
+  <h4 style="margin-top: 5px; margin-bottom: 5px">Login:</h4>
+  <form action="" method="post">
+    {{ login_form.hidden_tag() }} Username: {{ login_form.username }}
+    <br />
+    Password: {{ login_form.password }}
+    <br />
+    {% for field, errors in login_form.errors.items() %}
+    <ul class="errors">
+      {% for error in errors %}
+      <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+    {% endfor %} {{ login_form.submit }}
+  </form>
+  <br />
+  <h4 style="margin-top: 5px; margin-bottom: 5px">or register an Account:</h4>
+  <form style="margin-bottom: 5px" action="" method="post">
+    {{ register_form.hidden_tag() }} Username: {{ register_form.username }}
+    <br />
+    Password: {{ register_form.password }}
+    <br />
+    {% for field, errors in register_form.errors.items() %}
+    <ul class="errors">
+      {% for error in errors %}
+      <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+    {% endfor %} {{ register_form.submit }}
+  </form>
+</div>
+{% endblock %}

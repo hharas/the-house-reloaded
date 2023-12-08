@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% block title %}New Thread{% endblock %} {% block
+leftheader %} > <a href="/{{ category.id }}">{{ category.title }}/</a> {%
+endblock %} {% block main %}
+<div class="main">
+  <h3>New thread</h3>
+  <form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>Thread title</p>
+    {{ form.title }}
+    <br />
+    <p>Thread content</p>
+    {{ form.content }}
+    <br />
+    {{ form.file }}
+    <br />
+    <br />
+    {{ form.submit }}
+  </form>
+</div>
+{% endblock %}
