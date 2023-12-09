@@ -24,7 +24,7 @@ leftheader %} > <a href="/{{ category.title }}">{{ category.title }}/</a> >
             >{{ author.username }}</a
           >
         </div>
-        <p class="comment-ts">
+        <p class="comment-tr">
           <a
             style="color: #808080"
             href="{{ url_for('view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
@@ -32,9 +32,17 @@ leftheader %} > <a href="/{{ category.title }}">{{ category.title }}/</a> >
             {{ post.creation_date }}
           </a>
         </p>
-        {% if current_user.role == "admin" or (current_user.role == "moderator"
-        and author.role != "admin") or current_user.id == post.author %}
-        <p class="comment-delete">
+        {% if post.attachment_filename %}
+        <p class="comment-tr">
+          <a
+            href="{{ url_for('uploads', filename=post.attachment_filename) + '?download=true' }}"
+            >[save]</a
+          >
+        </p>
+        {% endif %} {% if current_user.role == "admin" or (current_user.role ==
+        "moderator" and author.role != "admin") or current_user.id ==
+        post.author %}
+        <p class="comment-tr">
           <a href="#">[delete]</a>
         </p>
         {% endif %}

@@ -55,7 +55,7 @@ main %}
       <div class="tooltip-wrap">
         <span style="color: #808080">{{ user.username }}</span>
       </div>
-      <p class="comment-ts">
+      <p class="comment-tr">
         <a
           style="color: #808080"
           href="{{ url_for('view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
@@ -64,15 +64,22 @@ main %}
         </a>
       </p>
       {% if current_user.is_authenticated %}
-      <p class="comment-reply">
+      <p class="comment-tr">
         <a
           href="{{ url_for('create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
           >[reply]</a
         >
       </p>
+      {% endif %} {% if post.attachment_filename %}
+      <p class="comment-tr">
+        <a
+          href="{{ url_for('uploads', filename=post.attachment_filename) + '?download=true' }}"
+          >[save]</a
+        >
+      </p>
       {% endif %} {% if current_user.role == "admin" or (current_user.role ==
       "moderator" and user.role != "admin") or current_user.id == post.author %}
-      <p class="comment-delete">
+      <p class="comment-tr">
         <a href="#">[delete]</a>
       </p>
       {% endif %}

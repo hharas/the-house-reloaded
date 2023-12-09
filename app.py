@@ -44,7 +44,7 @@ def render_content(value: str) -> str:
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///thehouse.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("THR_DATABASE_URI")
 app.config["SECRET_KEY"] = os.getenv("THR_SECRET_KEY")
 app.config["UPLOADS_DIRECTORY"] = "uploads"
 app.config["PREVIEWABLE_EXTENSIONS"] = ["png", "jpeg", "jpg", "gif", "mp4",
@@ -632,7 +632,7 @@ def view_thread(cat_title: str, thread_id: int):
                 />
                 </div>
             </div>
-            <p class="comment-ts">
+            <p class="comment-tr">
                 <a
                 style="color: #808080"
                 href="{post_url}"
@@ -643,20 +643,30 @@ def view_thread(cat_title: str, thread_id: int):
 
                 if current_user.is_authenticated:
                     html += f"""
-                <p class="comment-reply">
-                    <a
-                    href="{reply_url}"
-                    >[reply]</a
-                    >
-                </p>
-                """
+                    <p class="comment-tr">
+                        <a
+                        href="{reply_url}"
+                        >[reply]</a
+                        >
+                    </p>
+                    """
+
+                    if post.attachment_filename:
+                        html += f"""<p class="comment-tr">
+                        <a href="{url_for("uploads", filename=post.attachment_filename) + "?download=true"}">[save]</a>
+                        </p>"""
 
                     if current_user.role == "admin" or \
-                            (current_user.role == "moderator" and author.role != "admin") or \
+                        (current_user.role == "moderator" and author.role != "admin") or \
                             current_user.id == post.author:
                         html += """
-                    <p class="comment-delete">
-                        <a href="#">[delete]</a>
+                                <p class="comment-tr">
+                                    <a href="#">[delete]</a>
+                                </p>"""
+
+                elif post.attachment_filename:
+                    html += f"""<p class="comment-tr">
+                    <a href="{url_for("uploads", filename=post.attachment_filename) + "?download=true"}">[save]</a>
                     </p>"""
 
                 html += "</div>"
@@ -713,28 +723,6 @@ def view_thread(cat_title: str, thread_id: int):
     return render_template("404.html"), 404
 
 
-@app.get("/<cat_title>/<int:thread_id>/<int:post_id>")
-def view_post(cat_title: str, thread_id: int, post_id: int):
-    """View for viewing a post"""
-
-    category = Category.query.filter_by(title=cat_title).first()
-    thread = Thread.query.filter_by(id=thread_id).first()
-    post = Post.query.filter_by(id=post_id).first()
-
-    if category:
-        if thread:
-            if post:
-                return render_template(
-                    "view-post.html",
-                    category=category,
-                    thread=thread,
-                    post=post,
-                    User=User
-                )
-
-    return render_template("404.html"), 404
-
-
 @app.get("/<cat_title>/delete")
 def delete_category(cat_title: str):
     """View for deleting a category"""
@@ -772,6 +760,9 @@ def delete_category(cat_title: str):
 @app.get("/up/<path:filename>")
 def uploads(filename: str):
     """Serve uploaded files"""
+
+    if request.args.get("download") == "true":
+        return send_from_directory(app.config["UPLOADS_DIRECTORY"], filename, as_attachment=True)
 
     return send_from_directory(app.config["UPLOADS_DIRECTORY"], filename)
 
