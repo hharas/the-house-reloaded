@@ -14,6 +14,7 @@ current_user.role == "admin" %}
 <div class="index-main categories">
   <ol>
     {% for thread in threads %}
+    {% set posts = Post.query.filter_by(thread_id=thread.id).all() %}
     <li class="row">
       <p class="title">
         <a href="/{{ category.title }}/{{ thread.id }}">{{ thread.title }}</a>
@@ -25,15 +26,14 @@ current_user.role == "admin" %}
             href="{{ url_for('view_user', username=User.query.filter_by(id=thread.creator).first().username) }}"
             >{{ User.query.filter_by(id=thread.creator).first().username }}</a
           >
-          at {{ thread.creation_date }} | viewed {{ thread.views }} times | {%
-          if thread.last_active_user %} last active user is
-          <a
-            href="{{ url_for('view_user', username=User.query.filter_by(id=thread.last_active_user).first().username) }}"
-            >{{
-            User.query.filter_by(id=thread.last_active_user).first().username
-            }}</a
-          >
-          at {{ thread.last_activity_date }} {% else %} Inactive {% endif %}
+          at {{ thread.creation_date }} | viewed {{ thread.views }} times |
+          {% if posts|length == 0 %}
+            Inactive
+          {% else %}
+            {% set last_post = posts|last %}
+            {% set last_active_user = User.query.filter_by(id=last_post.author).first() %}
+            last active user is <a href="{{ url_for('view_user', username=last_active_user.username) }}">{{ last_active_user.username }}</a> at <a href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) + '#' + last_post.id|string }}">{{ last_post.creation_date }}</a>
+          {% endif %}
         </p>
       </div>
     </li>

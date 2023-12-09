@@ -437,7 +437,8 @@ def view_category(cat_title: str):
             "view-category.html",
             category=category,
             threads=threads,
-            User=User
+            User=User,
+            Post=Post
         )
 
     return render_template("404.html"), 404
