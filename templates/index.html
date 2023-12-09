@@ -15,15 +15,49 @@ rightheader %} {% if current_user.role == "admin" %}
       </p>
       <div class="bottom">
         <p>
-          {{ category.description }} | {% if category.last_active_user %} last
+          {{ category.description }} | {% if category.activities|length == 0 %}
+          Inactive {% else %} {% set last_activity = category.activities|last %}
+          {% if last_activity.type == "thread" %} {% set last_active_user =
+          User.query.filter_by(id=last_activity.data.creator).first() %} last
           active user is
+          <a
+            href="{{ url_for('view_user', username=last_active_user.username) }}"
+            >{{ last_active_user.username }}</a
+          >
+          creating
+          <a
+            href="{{ url_for('view_thread', cat_title=category.title, thread_id=last_activity.data.id) }}"
+            >{{ last_activity.data.title }}</a
+          >
+          at {{ last_activity.data.creation_date }} {% elif last_activity.type
+          == "post" %} {% set last_active_user =
+          User.query.filter_by(id=last_activity.data.author).first() %} {% set
+          last_active_thread =
+          Thread.query.filter_by(id=last_activity.data.thread_id).first() %}
+          last active user is
+          <a
+            href="{{ url_for('view_user', username=last_active_user.username) }}"
+            >{{ last_active_user.username }}</a
+          >
+          at
+          <a
+            href="{{ url_for('view_thread', cat_title=category.title, thread_id=last_active_thread.id) + '#' + last_activity.data.id|string }}"
+            >{{ last_activity.data.creation_date }}</a
+          >
+          in
+          <a
+            href="{{ url_for('view_thread', cat_title=category.title, thread_id=last_active_thread.id) }}"
+            >{{ last_active_thread.title }}</a
+          >
+          {% endif %} {% endif %}
+          <!-- {# {% if category.last_active_user %} last active user is
           <a
             href="{{ url_for('view_user', username=User.query.filter_by(id=category.last_active_user).first().username) }}"
             >{{
             User.query.filter_by(id=category.last_active_user).first().username
             }}</a
           >
-          at {{ category.last_activity_date }} {% else %} Inactive {% endif %}
+          at {{ category.last_activity_date }} {% else %} Inactive {% endif %} #} -->
         </p>
       </div>
     </li>

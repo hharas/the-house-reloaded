@@ -105,8 +105,6 @@ class Category(db.Model):  # pylint: disable=too-few-public-methods
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(10), nullable=False, unique=True)
     description = db.Column(db.String(150), nullable=False)
-    last_active_user = db.Column(db.String(36), default=None)
-    last_activity_date = db.Column(db.DateTime, default=None)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
 
@@ -120,8 +118,6 @@ class Thread(db.Model):  # pylint: disable=too-few-public-methods
     attachment_filename = db.Column(db.Text)
     creation_date = db.Column(
         db.DateTime, nullable=False, server_default=db.func.current_timestamp())
-    last_active_user = db.Column(db.String(36), default=None)
-    last_activity_date = db.Column(db.DateTime, default=None)
     views = db.Column(db.Integer, nullable=False, default=0)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
@@ -231,11 +227,20 @@ def index():
 
     categories = Category.query.all()
 
+    for category in categories:
+        category.activities = []
+
+        for thread in Thread.query.filter_by(cat_id=category.id):
+            category.activities.append({"type": "thread", "data": thread})
+        for post in Post.query.filter_by(cat_id=category.id):
+            category.activities.append({"type": "post", "data": post})
+
     return render_template(
         "index.html",
-        current_user=current_user,
         categories=categories,
-        User=User
+        Thread=Thread,
+        Post=Post,
+        User=User,
     )
 
 
