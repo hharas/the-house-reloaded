@@ -47,6 +47,7 @@ def render_content(value: str) -> str:
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("THR_DATABASE_URI")
 app.config["SECRET_KEY"] = os.getenv("THR_SECRET_KEY")
+app.config["STATIC_DIRECTORY"] = os.getenv("THR_STATIC_DIRECTORY")
 app.config["UPLOADS_DIRECTORY"] = os.getenv("THR_UPLOADS_DIRECTORY")
 app.config["PREVIEWABLE_EXTENSIONS"] = ["png", "jpeg", "jpg", "gif", "mp4",
                                         "webm", "mp3", "ogg", "wav", "flac",
