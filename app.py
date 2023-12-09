@@ -588,11 +588,11 @@ def view_thread(cat_title: str, thread_id: int):
             author_profile_url = url_for("view_user", username=author.username)
 
             if author.role == "user":
-                author_rendered_role = f"""<span style="color: lightgreen;">{author.role}<span>"""
+                author_rendered_role = f"""<span style="color: lightgreen;">{author.role}</span>"""
             elif author.role == "moderator":
-                author_rendered_role = f"""<span style="color: yellow;">{author.role}<span>"""
+                author_rendered_role = f"""<span style="color: yellow;">{author.role}</span>"""
             else:
-                author_rendered_role = f"""<span style="color: red;">{author.role}<span>"""
+                author_rendered_role = f"""<span style="color: red;">{author.role}</span>"""
 
             picture_url = url_for(
                 "uploads",
