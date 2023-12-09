@@ -96,7 +96,7 @@ class Category(db.Model):  # pylint: disable=too-few-public-methods
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(10), nullable=False, unique=True)
     description = db.Column(db.String(150), nullable=False)
-    last_active_user = db.Column(db.String(20), default=None)
+    last_active_user = db.Column(db.String(36), default=None)
     last_activity_date = db.Column(db.DateTime, default=None)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
