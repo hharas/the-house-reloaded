@@ -13,6 +13,7 @@ from flask import (Flask, redirect, render_template, request,
 from flask_bcrypt import Bcrypt
 from flask_login import (LoginManager, UserMixin, current_user, login_user,
                          logout_user)
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import (FileField, PasswordField, StringField, SubmitField,
@@ -46,7 +47,7 @@ def render_content(value: str) -> str:
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("THR_DATABASE_URI")
 app.config["SECRET_KEY"] = os.getenv("THR_SECRET_KEY")
-app.config["UPLOADS_DIRECTORY"] = "uploads"
+app.config["UPLOADS_DIRECTORY"] = os.getenv("THR_UPLOADS_DIRECTORY")
 app.config["PREVIEWABLE_EXTENSIONS"] = ["png", "jpeg", "jpg", "gif", "mp4",
                                         "webm", "mp3", "ogg", "wav", "flac",
                                         "alac", "m4a", "aac", "svg"]
@@ -55,6 +56,9 @@ app.jinja_env.filters['render_content'] = render_content
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+bcrypt = Bcrypt(app)
+os.makedirs(app.config["UPLOADS_DIRECTORY"], exist_ok=True)
 
 
 @login_manager.user_loader
@@ -71,7 +75,7 @@ def set_default_theme():
 
 
 db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
+Migrate(app, db)
 
 
 class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
