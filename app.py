@@ -75,6 +75,10 @@ def set_default_theme():
 
 
 db = SQLAlchemy(app)
+
+with app.app_context():
+    db.create_all()
+
 Migrate(app, db)
 
 
@@ -764,6 +768,9 @@ def delete_category(cat_title: str):
 @app.get("/up/<path:filename>")
 def uploads(filename: str):
     """Serve uploaded files"""
+
+    if not os.path.exists(os.path.join(app.config["UPLOADS_DIRECTORY"], filename)):
+        return send_from_directory(app.config["STATIC_DIRECTORY"], "filenotfound.jpg")
 
     if request.args.get("download") == "true":
         return send_from_directory(app.config["UPLOADS_DIRECTORY"], filename, as_attachment=True)
