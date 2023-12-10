@@ -76,10 +76,6 @@ def set_default_theme():
 
 
 db = SQLAlchemy(app)
-
-with app.app_context():
-    db.create_all()
-
 Migrate(app, db)
 
 
@@ -107,6 +103,12 @@ class Category(db.Model):  # pylint: disable=too-few-public-methods
     description = db.Column(db.String(150), nullable=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
+    def delete(self):
+        """Remove category description and flag it as deleted"""
+
+        self.deleted = True
+        self.description = ""
+
 
 class Thread(db.Model):  # pylint: disable=too-few-public-methods
     """A Casual thread"""
@@ -120,6 +122,17 @@ class Thread(db.Model):  # pylint: disable=too-few-public-methods
         db.DateTime, nullable=False, server_default=db.func.current_timestamp())
     views = db.Column(db.Integer, nullable=False, default=0)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
+
+    def delete(self):
+        """Remove thread contents and flag it as deleted"""
+
+        self.deleted = True
+        self.title = ""
+        self.content = ""
+
+        if self.attachment_filename:
+            os.remove(os.path.join(
+                app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
 
 
 class Post(db.Model):  # pylint: disable=too-few-public-methods
@@ -231,9 +244,16 @@ def index():
         category.activities = []
 
         for thread in Thread.query.filter_by(cat_id=category.id):
-            category.activities.append({"type": "thread", "data": thread})
+            if not thread.deleted:
+                category.activities.append({"type": "thread", "data": thread})
         for post in Post.query.filter_by(cat_id=category.id):
-            category.activities.append({"type": "post", "data": post})
+            if not post.deleted:
+                category.activities.append({"type": "post", "data": post})
+
+        category.activities = sorted(
+            category.activities,
+            key=lambda activity: activity['data'].creation_date,
+        )
 
     return render_template(
         "index.html",
@@ -558,10 +578,11 @@ def create_post(cat_title: str, thread_id: int):
         if reply_to is not None:
             replied_to = Post.query.filter_by(id=reply_to).first()
 
-            if not replied_to:
-                return render_template("404.html"), 404
-
-            if category.id != replied_to.cat_id or thread_id != replied_to.thread_id:
+            if not replied_to or \
+                    (
+                        category.id != replied_to.cat_id or
+                        thread_id != replied_to.thread_id
+                    ) or replied_to.deleted:
                 return render_template("404.html"), 404
 
         return render_template(
@@ -656,7 +677,7 @@ def view_thread(cat_title: str, thread_id: int):
                 </a>
             </p>"""
 
-                if current_user.is_authenticated:
+                if current_user.is_authenticated and not post.deleted:
                     html += f"""
                     <p class="comment-tr">
                         <a
@@ -666,25 +687,32 @@ def view_thread(cat_title: str, thread_id: int):
                     </p>
                     """
 
-                    if post.attachment_filename:
+                    if post.attachment_filename and not post.deleted:
                         html += f"""<p class="comment-tr">
                         <a href="{url_for("uploads", filename=post.attachment_filename) + "?download=true"}">[save]</a>
                         </p>"""
 
-                    if current_user.role == "admin" or \
-                        (current_user.role == "moderator" and author.role != "admin") or \
-                            current_user.id == post.author:
-                        html += """
-                                <p class="comment-tr">
-                                    <a href="#">[delete]</a>
+                    if not post.deleted and (current_user.role == "admin" or
+                                             (
+                                                 current_user.role == "moderator" and
+                                                 author.role == "user"
+                                             ) or
+                                             current_user.id == post.author):
+                        html += f"""<p class="comment-tr">
+                                    <a href="{url_for('delete_post', cat_title=category.title, thread_id=post.thread_id, post_id=post.id)}">[delete]</a>
                                 </p>"""
 
-                elif post.attachment_filename:
+                elif post.attachment_filename and not post.deleted:
                     html += f"""<p class="comment-tr">
                     <a href="{url_for("uploads", filename=post.attachment_filename) + "?download=true"}">[save]</a>
                     </p>"""
 
                 html += "</div>"
+
+                if post.deleted:
+                    html += """<div class="comment-content" style="font-style: italic;"
+                        >[deleted]
+                    </div>"""
 
                 if post.content:
                     html += f"""<div class="comment-content">{render_content(post.content)}</div>"""
@@ -738,6 +766,91 @@ def view_thread(cat_title: str, thread_id: int):
     return render_template("404.html"), 404
 
 
+@app.get("/<cat_title>/<int:thread_id>/<int:post_id>/delete")
+def delete_post(cat_title: str, thread_id: int, post_id: int):
+    """View for deleting a post"""
+
+    category = Category.query.filter_by(title=cat_title).first()
+    thread = Thread.query.filter_by(id=thread_id).first()
+    post = Post.query.filter_by(id=post_id).first()
+    author = User.query.filter_by(id=post.author).first()
+
+    if current_user.is_authenticated:
+        if current_user.role == "admin" or \
+            (current_user.role == "moderator" and author.role == "user") or \
+                current_user.id == author.id:
+
+            if post.cat_id == category.id and post.thread_id == thread.id:
+                if not post.deleted:
+                    if request.args.get("confirm") == "yes":
+                        post.delete()
+                        db.session.add(post)
+                        db.session.commit()
+
+                        return redirect(
+                            url_for(
+                                "view_thread",
+                                cat_title=category.title,
+                                thread_id=thread.id
+                            ) + '#' + str(post.id)
+                        )
+
+                    return render_template(
+                        "delete-post.html",
+                        category=category,
+                        thread=thread,
+                        post=post,
+                        author=author
+                    )
+
+            return render_template("404.html"), 404
+
+    return render_template("403.html"), 403
+
+
+@app.get("/<cat_title>/<int:thread_id>/delete")
+def delete_thread(cat_title: str, thread_id: int):
+    """View for deleting a thread"""
+
+    category = Category.query.filter_by(title=cat_title).first()
+    thread = Thread.query.filter_by(id=thread_id).first()
+    creator = User.query.filter_by(id=thread.creator).first()
+
+    if current_user.is_authenticated:
+        if current_user.role == "admin" or \
+            (current_user.role == "moderator" and creator.role == "user") or \
+                current_user.id == creator.id:
+            if thread.cat_id == category.id:
+                if not thread.deleted:
+                    if request.args.get("confirm") == "yes":
+                        for post in Post.query.filter_by(thread_id=thread.id).all():
+                            post.delete()
+                            db.session.add(post)
+
+                        thread.delete()
+                        db.session.add(thread)
+                        db.session.commit()
+
+                        return redirect(
+                            url_for(
+                                "view_thread",
+                                cat_title=category.title,
+                                thread_id=thread.id
+                            )
+                        )
+
+                    return render_template(
+                        "delete-thread.html",
+                        category=category,
+                        thread=thread,
+                        posts=Post.query.filter_by(thread_id=thread.id).all()
+                    )
+
+            return render_template("404.html"), 404
+
+    return render_template("403.html"), 403
+
+
 @app.get("/<cat_title>/delete")
 def delete_category(cat_title: str):
     """View for deleting a category"""
@@ -748,26 +861,33 @@ def delete_category(cat_title: str):
 
     if current_user.is_authenticated:
         if current_user.role == "admin":
-            if request.args.get("confirm") == "yes":
-                # for post in posts:
-                #     db.session.delete(post)
+            if not category.deleted:
+                if request.args.get("confirm") == "yes":
+                    for post in posts:
+                        if not post.deleted:
+                            post.delete()
+                            db.session.add(post)
 
-                # for thread in threads:
-                #     db.session.delete(thread)
+                    for thread in threads:
+                        if not thread.deleted:
+                            thread.delete()
+                            db.session.add(thread)
 
-                # db.session.delete(category)
-                # db.session.commit()
+                    category.delete()
+                    db.session.add(category)
 
-                # return redirect(request.args.get("referer", url_for("index")))
+                    db.session.commit()
 
-                return "DELETE NoW!!!!!!!!"
+                    return redirect(url_for("index"))
 
-            return render_template(
-                "delete-category.html",
-                category=category,
-                threads=threads,
-                posts=posts
-            )
+                return render_template(
+                    "delete-category.html",
+                    category=category,
+                    threads=threads,
+                    posts=posts
+                )
+
+            return render_template("404.html"), 404
 
     return render_template("403.html"), 403
 

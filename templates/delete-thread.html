@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block title %}Delete Thread{% endblock %} {% block
+leftheader %} >
+<a href="{{ url_for('view_category', cat_title=category.title) }}"
+  >{{ category.title }}/</a
+>
+>
+<a
+  href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
+>
+  {{ thread.title }}</a
+>{% endblock %} {% block main %}
+<div class="main">
+  <h3>Delete thread</h3>
+  <p>
+    This thread has <b>{{ posts|length }}</b> posts
+    <br />
+    Are you sure you want to delete it?
+  </p>
+  <br />
+  <a
+    href="{{ url_for('delete_thread', cat_title=category.title, thread_id=thread.id) + '?confirm=yes' }}"
+    ><button style="color: black">Delete thread</button></a
+  >
+</div>
+{% endblock %}

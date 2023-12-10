@@ -35,3 +35,6 @@ db-setup:
 
 db-clean: instance
 	rm -rf instance
+
+up-clean: uploads
+	rm -rf uploads/*

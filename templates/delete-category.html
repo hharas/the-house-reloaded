@@ -1,12 +1,11 @@
-{% extends "base.html" %} {% block title %}Delete Category{% endblock %} {%
-block main %}
+{% extends "base.html" %} {% block title %}Delete Category{% endblock %}{% block
+leftheader %} >
+<a href="{{ url_for('view_category', cat_title=category.title) }}"
+  >{{ category.title }}/</a
+>
+{% endblock %} {% block main %}
 <div class="main">
-  <h3>
-    Delete category
-    <a href="{{ url_for('view_category', cat_title=category.title) }}"
-      >{{ category.title }}</a
-    >
-  </h3>
+  <h3>Delete category</h3>
   <p>
     This category has <b>{{ threads|length }}</b> threads and
     <b>{{ posts|length }}</b> posts

@@ -1,14 +1,27 @@
 {% extends "base.html" %} {% block title %}{{ thread.title }}{% endblock %} {%
 block leftheader %} >
-<a href="/{{ category.title }}">{{ category.title }}/</a> {% endblock %} {%
-block rightheader %} {% if current_user.is_authenticated %} {% if
-current_user.role == "admin" or (current_user.role == "moderator" and
-User.query.filter_by(id=thread.creator).first().role != "admin") or
-current_user.id == thread.creator %} <a href="#">delete thread</a> | {% endif %}
-<a href="/{{ category.title }}/new">create thread</a> | {% endif %} {% endblock
-%} {% block main %}
+<a href="{{ url_for('view_category', cat_title=category.title) }}"
+  >{{ category.title }}/</a
+>
+{% endblock %} {% block rightheader %} {% if current_user.is_authenticated %} {%
+if not thread.deleted and (current_user.role == "admin" or (current_user.role ==
+"moderator" and User.query.filter_by(id=thread.creator).first().role != "admin")
+or current_user.id == thread.creator) %}
+<a
+  href="{{ url_for('delete_thread', cat_title=category.title, thread_id=thread.id) }}"
+  >delete thread</a
+>
+| {% endif %}
+<a href="{{ url_for('view_category', cat_title=category.title) }}/new"
+  >create thread</a
+>
+| {% endif %} {% endblock %} {% block main %}
 <div class="main">
+  {% if not thread.deleted %}
   <h4 style="margin-top: 5px">{{ thread.title }}</h4>
+  {% else %}
+  <h4 style="margin-top: 5px; font-style: italic">[deleted]</h4>
+  {% endif %}
   <p style="font-size: 13px">
     created by
     <a
@@ -19,7 +32,9 @@ current_user.id == thread.creator %} <a href="#">delete thread</a> | {% endif %}
     == 1 %} time {% else %} times {% endif %}
   </p>
   <br />
-  {% if thread.content %}
+  {% if thread.deleted %}
+  <p style="font-style: italic">[deleted]</p>
+  {% endif %} {% if thread.content %}
   <p>{{ thread.content|render_content|safe }}</p>
   {% endif %} {% if thread.attachment_filename %} <br />
   {% if thread.attachment_filename.split(".")|last in

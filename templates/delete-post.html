@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}New Post{% endblock %} {% block
+{% extends "base.html" %} {% block title %}Delete Thread{% endblock %} {% block
 leftheader %} >
 <a href="{{ url_for('view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
@@ -6,14 +6,11 @@ leftheader %} >
 >
 <a
   href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
-  >{{ thread.title }}</a
 >
-{% endblock %} {% block main %}
+  {{ thread.title }}</a
+>{% endblock %} {% block main %}
 <div class="main">
-  <h3>New reply</h3>
-  {% if reply_to %} {% set post = Post.query.filter_by(id=reply_to).first() %}
-  {% set author = User.query.filter_by(id=post.author).first() %}
-  <p>to:</p>
+  <h3>Delete post</h3>
   <div style="border: 3px solid grey">
     <div
       id="{{ post.id }}"
@@ -36,27 +33,23 @@ leftheader %} >
             {{ post.creation_date }}
           </a>
         </p>
-        {% if post.attachment_filename and not post.deleted %}
+        {% if not post.deleted %}
+        <p class="comment-tr">
+          <a
+            href="{{ url_for('create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
+            >[reply]</a
+          >
+        </p>
+        {% endif %} {% if post.attachment_filename and not post.deleted %}
         <p class="comment-tr">
           <a
             href="{{ url_for('uploads', filename=post.attachment_filename) + '?download=true' }}"
             >[save]</a
           >
         </p>
-        {% endif %} {% if not post.deleted and (current_user.role == "admin" or
-        (current_user.role == "moderator" and author.role == "user") or
-        current_user.id == post.author) %}
-        <p class="comment-tr">
-          <a
-            href="{{ url_for('delete_post', cat_title=category.title, thread_id=post.thread_id, post_id=post.id) }}"
-            >[delete]</a
-          >
-        </p>
         {% endif %}
       </div>
-      {% if post.deleted %}
-      <div class="comment-content" style="font-style: italic">[deleted]</div>
-      {% endif %} {% if post.content %}
+      {% if post.content %}
       <div class="comment-content">{{ post.content|render_content|safe }}</div>
       {% endif %} {% if post.attachment_filename %} {% if
       post.attachment_filename.split(".")|last in
@@ -73,19 +66,9 @@ leftheader %} >
     </div>
   </div>
   <br />
-  {% endif %}
-  <form action="" method="post" enctype="multipart/form-data">
-    {{ form.hidden_tag() }} {{ form.content }}
-    <br />
-    {{ form.file }}
-    <br />
-    {% for field, errors in form.errors.items() %}
-    <ul class="errors">
-      {% for error in errors %}
-      <li>{{ error }}</li>
-      {% endfor %}
-    </ul>
-    {% endfor %} {{ form.submit }}
-  </form>
+  <a
+    href="{{ url_for('delete_post', cat_title=category.title, thread_id=thread.id, post_id=post.id) + '?confirm=yes' }}"
+    ><button style="color: black">Delete post</button></a
+  >
 </div>
 {% endblock %}
