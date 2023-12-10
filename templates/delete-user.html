@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block title %}Delete User{% endblock %} {% block
+metatags %}
+<meta name="og:title" value="Delete this user account" />
+{% endblock %} {% block leftheader %} >
+<a href="{{ url_for('view_user', username=user.username) }}"
+  >~{{ user.username }}</a
+>
+{% endblock %} {% block main %}
+<div class="main">
+  <h3>Delete user account</h3>
+  <p>
+    This user has created <b>{{ threads|length }}</b> threads and written
+    <b>{{ posts|length }}</b> posts
+    <br />
+    Are you sure you want to delete the account?
+  </p>
+  <br />
+  <a
+    href="{{ url_for('delete_user', username=user.username) + '?confirm=yes' }}"
+    ><button style="color: black">Delete account</button></a
+  >
+</div>
+{% endblock %}

@@ -22,8 +22,7 @@ current_user.role == "admin" %}
 {% else %}
 <div class="index-main categories">
   <ol>
-    {% for thread in threads %} {% if not thread.deleted %} {% set posts =
-    Post.query.filter_by(thread_id=thread.id).all() %}
+    {% for thread in threads %} {% if not thread.deleted %}
     <li class="row">
       <p class="title">
         <a
@@ -39,10 +38,10 @@ current_user.role == "admin" %}
             >{{ User.query.filter_by(id=thread.creator).first().username }}</a
           >
           at {{ thread.creation_date }} | viewed {{ thread.views }} times | {%
-          if posts|length == 0 %} Inactive {% else %} {% set last_post =
-          posts|last %} {% set last_active_user =
-          User.query.filter_by(id=last_post.author).first() %} last active user
-          is
+          if thread.posts|length == 0 %} Inactive {% else %} {% set last_post =
+          thread.posts|last %} {% set last_active_user =
+          User.query.filter_by(id=last_post.author, deleted=False).first() %}
+          last active user is
           <a
             href="{{ url_for('view_user', username=last_active_user.username) }}"
             >{{ last_active_user.username }}</a

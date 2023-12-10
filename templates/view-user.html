@@ -6,7 +6,12 @@ block metatags %}
   value="{% if user.picture_filename %} {{ url_for('uploads', filename=user.picture_filename) }} {% else %} {{ url_for('static', filename='default.png') }} {% endif %}"
 />
 {% endblock %} {% block leftheader %} <span>> ~{{ user.username }}</span> {%
-endblock %} {% block main %}
+endblock %} {% block rightheader %} {% if current_user.role == "admin" or
+current_user.id == user.id %}
+<a href="{{ url_for('delete_user', username=user.username) }}"
+  >delete account</a
+>
+| {% endif %} {% endblock %} {% block main %}
 <div class="main">
   <b>{{ user.username }}</b> | {% if user.role == "user" %}
   <span style="color: lightgreen">{{ user.role }}</span>

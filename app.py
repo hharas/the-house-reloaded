@@ -75,6 +75,14 @@ def set_default_theme():
         session["theme"] = "light"
 
 
+@app.before_request
+def logout_if_deleted():
+    """Logout a user if his account has been deleted"""
+    if current_user.is_authenticated:
+        if current_user.deleted:
+            logout_user()
+
+
 db = SQLAlchemy(app)
 Migrate(app, db)
 
@@ -83,8 +91,6 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
     """A Housean user"""
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid4()), unique=True)
-    token = db.Column(db.String(36), nullable=False,
-                      default=lambda: str(uuid4()), unique=True)
     username = db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.Text, nullable=False)
     joined_date = db.Column(db.DateTime, nullable=False,
@@ -94,6 +100,17 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
     picture_filename = db.Column(db.Text)
     bio = db.Column(db.String(60))
     deleted = db.Column(db.Boolean, nullable=False, default=False)
+
+    def delete(self):
+        """Delete user information and flag the user as deleted"""
+
+        self.deleted = True
+        self.role = "user"
+        self.bio = None
+
+        if self.picture_filename:
+            os.remove(os.path.join(
+                app.config["UPLOADS_DIRECTORY"], self.picture_filename))
 
 
 class Category(db.Model):  # pylint: disable=too-few-public-methods
@@ -192,6 +209,9 @@ class LoginForm(FlaskForm):
         user = User.query.filter_by(username=username).first()
 
         if user:
+            if user.deleted:
+                raise ValidationError("This account has been deleted")
+
             if not bcrypt.check_password_hash(user.password, field.data):
                 raise ValidationError("Incorrect password")
 
@@ -245,10 +265,13 @@ def index():
 
         for thread in Thread.query.filter_by(cat_id=category.id):
             if not thread.deleted:
-                category.activities.append({"type": "thread", "data": thread})
+                if not User.query.filter_by(id=thread.creator).first().deleted:
+                    category.activities.append(
+                        {"type": "thread", "data": thread})
         for post in Post.query.filter_by(cat_id=category.id):
             if not post.deleted:
-                category.activities.append({"type": "post", "data": post})
+                if not User.query.filter_by(id=post.author).first().deleted:
+                    category.activities.append({"type": "post", "data": post})
 
         category.activities = sorted(
             category.activities,
@@ -299,11 +322,11 @@ def login():
 
     if login_form.validate_on_submit():
         user = User.query.filter_by(username=login_form.username.data).first()
-        if user:
-            if bcrypt.check_password_hash(user.password, login_form.password.data):
-                login_user(user)
 
-                return redirect(request.args.get("referer", url_for("index")))
+        if user:
+            login_user(user)
+
+            return redirect(request.args.get("referer", url_for("index")))
 
     if register_form.validate_on_submit():
         if db.engine.dialect.name == "postgresql":
@@ -411,27 +434,30 @@ def view_user(username: str):
     user = User.query.filter_by(username=username).first()
 
     if user:
-        activities = []
+        if not user.deleted:
+            activities = []
 
-        for thread in Thread.query.filter_by(creator=user.id).all():
-            activities.append({"type": "thread", "data": thread})
+            for thread in Thread.query.filter_by(creator=user.id).all():
+                if not thread.deleted:
+                    activities.append({"type": "thread", "data": thread})
 
-        for post in Post.query.filter_by(author=user.id).all():
-            activities.append({"type": "post", "data": post})
+            for post in Post.query.filter_by(author=user.id).all():
+                if not post.deleted:
+                    activities.append({"type": "post", "data": post})
 
-        activities = sorted(
-            activities,
-            key=lambda activity: activity['data'].creation_date,
-            reverse=True
-        )
+            activities = sorted(
+                activities,
+                key=lambda activity: activity['data'].creation_date,
+                reverse=True
+            )
 
-        return render_template(
-            "view-user.html",
-            user=user,
-            activities=activities,
-            Category=Category,
-            Thread=Thread,
-        )
+            return render_template(
+                "view-user.html",
+                user=user,
+                activities=activities,
+                Category=Category,
+                Thread=Thread,
+            )
 
     return render_template("404.html"), 404
 
@@ -465,6 +491,19 @@ def view_category(cat_title: str):
 
     if category:
         threads = Thread.query.filter_by(cat_id=category.id).all()
+
+        for thread in threads:
+            thread.posts = []
+
+            for post in Post.query.filter_by(thread_id=thread.id):
+                if not post.deleted:
+                    if not User.query.filter_by(id=post.author).first().deleted:
+                        thread.posts.append(post)
+
+            thread.posts = sorted(
+                thread.posts,
+                key=lambda post: post.creation_date,
+            )
 
         return render_template(
             "view-category.html",
@@ -593,6 +632,9 @@ def create_post(cat_title: str, thread_id: int):
                     ) or replied_to.deleted:
                 return render_template("404.html"), 404
 
+        if thread.deleted:
+            return render_template("404.html"), 404
+
         return render_template(
             "new-post.html",
             form=form,
@@ -651,39 +693,44 @@ def view_thread(cat_title: str, thread_id: int):
             if post.replying_to == parent_id:
                 html += f"""<div id="{post.id}" class="comment">
             <div class="top-comment">
-            <div class="tooltip-wrap">
-                <a
-                style="color: #808080"
-                href="{author_profile_url}"
-                >{author.username}</a
-                >
-                <div class="tooltip-content">
-                <p>
-                    <a href="{author_profile_url}"
+            <div class="tooltip-wrap">"""
+
+                if author.deleted:
+                    html += """<p style="color: #808080; font-style: italic;">[deleted]</p></div>"""
+                else:
+                    html += f"""<a
+                    style="color: #808080"
+                    href="{author_profile_url}"
                     >{author.username}</a
                     >
-                    | {author_rendered_role} | {author_post_count} posts
-                </p>"""
+                    <div class="tooltip-content">
+                    <p>
+                        <a href="{author_profile_url}"
+                        >{author.username}</a
+                        >
+                        | {author_rendered_role} | {author_post_count} posts
+                    </p>"""
 
-                if author.bio:
-                    html += f"""<p style="color: #808080; font-size: 13px">Bio:</p>
-                <p class="bio">{author.bio}</p>"""
+                    if author.bio:
+                        html += f"""<p style="color: #808080; font-size: 13px">Bio:</p>
+                    <p class="bio">{author.bio}</p>"""
 
-                html += f"""
-                <img
-                    src="{picture_url}"
-                    style="max-width: 160px; margin-top: 3px"
-                />
-                </div>
-            </div>
-            <p class="comment-tr">
-                <a
-                style="color: #808080"
-                href="{post_url}"
-                >
-                {post.creation_date}
-                </a>
-            </p>"""
+                    html += f"""
+                            <img
+                                src="{picture_url}"
+                                style="max-width: 160px; margin-top: 3px"
+                            />
+                            </div>
+                        </div>"""
+
+                html += f"""<p class="comment-tr">
+                        <a
+                        style="color: #808080"
+                        href="{post_url}"
+                        >
+                        {post.creation_date}
+                        </a>
+                    </p>"""
 
                 if current_user.is_authenticated and not post.deleted:
                     html += f"""
@@ -893,6 +940,51 @@ def delete_category(cat_title: str):
                     category=category,
                     threads=threads,
                     posts=posts
+                )
+
+            return render_template("404.html"), 404
+
+    return render_template("403.html"), 403
+
+
+@app.get("/~<username>/delete")
+def delete_user(username: str):
+    """View for deleting a user"""
+
+    user = User.query.filter_by(username=username).first()
+    threads = Thread.query.filter_by(creator=user.id).all()
+    posts = Post.query.filter_by(author=user.id).all()
+
+    if current_user.is_authenticated:
+        if current_user.role == "admin" or \
+                current_user.id == user.id:
+            if not user.deleted:
+                if request.args.get("confirm") == "yes":
+                    for post in posts:
+                        if not post.deleted:
+                            post.delete()
+                            db.session.add(post)
+
+                    for thread in threads:
+                        if not thread.deleted:
+                            thread.delete()
+                            db.session.add(thread)
+
+                    user.delete()
+                    db.session.add(user)
+
+                    db.session.commit()
+
+                    if current_user.id == user.id:
+                        logout_user()
+
+                    return redirect(url_for("index"))
+
+                return render_template(
+                    "delete-user.html",
+                    user=user,
+                    threads=threads,
+                    posts=posts,
                 )
 
             return render_template("404.html"), 404
