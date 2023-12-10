@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block title %}New Thread{% endblock %} {% block
-leftheader %} >
+metatags %}
+<meta name="og:title" value="Create a new thread" />
+{% endblock %} {% block leftheader %} >
 <a href="{{ url_for('view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >

@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block title %}Homepage{% endblock %} {% block
-rightheader %} {% if current_user.role == "admin" %}
+metatags %}
+<meta name="og:title" value="Index" />
+{% endblock %} {% block rightheader %} {% if current_user.role == "admin" %}
 <a href="{{ url_for('create_category') }}">create category</a> | {% endif %} {%
 endblock %} {% block main %} {% if categories|length == 0 %}
 <div class="main">

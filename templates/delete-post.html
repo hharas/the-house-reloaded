@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block title %}Delete Thread{% endblock %} {% block
-leftheader %} >
+metatags %}
+<meta name="og:title" value="Delete this post" />
+{% endblock %} {% block leftheader %} >
 <a href="{{ url_for('view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >

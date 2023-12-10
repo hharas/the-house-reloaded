@@ -1,5 +1,12 @@
 {% extends "base.html" %} {% block title %}{{ thread.title }}{% endblock %} {%
-block leftheader %} >
+block metatags %}
+<meta name="og:title" value="{{ category.title }} > {{ thread.title }}" />
+{% if thread.attachment_filename %}
+<meta
+  name="og:image"
+  value="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+/>
+{% endif %} {% endblock %} {% block leftheader %} >
 <a href="{{ url_for('view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >

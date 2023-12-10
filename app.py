@@ -310,7 +310,7 @@ def login():
             hashed_password = bcrypt.generate_password_hash(
                 register_form.password.data
             ).decode("utf-8")
-        
+
         elif db.engine.dialect.name == "sqlite":
             hashed_password = bcrypt.generate_password_hash(
                 register_form.password.data

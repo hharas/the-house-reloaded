@@ -1,6 +1,8 @@
 {% extends "base.html" %} {% block title %}{{ category.title }}/{% endblock %}
-{% block leftheader %} <span>> {{ category.title }}/</span> {% endblock %} {%
-block rightheader %} {% if current_user.is_authenticated %} {% if
+{% block metatags %}
+<meta name="og:title" value="Threads under {{ category.title }}/" />
+{% endblock %} {% block leftheader %} <span>> {{ category.title }}/</span> {%
+endblock %} {% block rightheader %} {% if current_user.is_authenticated %} {% if
 current_user.role == "admin" %}
 <a href="{{ url_for('delete_category', cat_title=category.title) }}"
   >delete category</a

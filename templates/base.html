@@ -14,6 +14,9 @@
       href="{% if session['theme'] == 'dark' %} {{ url_for('static', filename='dark-theme.css') }} {% else %} {{ url_for('static', filename='light-theme.css') }} {% endif %}"
     />
     <title>{% block title %}{% endblock %} • The House</title>
+    <meta name="og:site_name" value="The House" />
+    <meta name="og:url" value="{{ request.url }}" />
+    {% block metatags %} {% endblock %}
   </head>
   <body>
     <table cellpadding="0" cellspacing="0" width="100%" class="top-bar">

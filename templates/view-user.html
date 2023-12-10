@@ -1,6 +1,12 @@
 {% extends "base.html" %} {% block title %}{{ user.username }}{% endblock %} {%
-block leftheader %} <span>> ~{{ user.username }}</span> {% endblock %} {% block
-main %}
+block metatags %}
+<meta name="og:title" value="~{{ user.username }}" />
+<meta
+  name="og:image"
+  value="{% if user.picture_filename %} {{ url_for('uploads', filename=user.picture_filename) }} {% else %} {{ url_for('static', filename='default.png') }} {% endif %}"
+/>
+{% endblock %} {% block leftheader %} <span>> ~{{ user.username }}</span> {%
+endblock %} {% block main %}
 <div class="main">
   <b>{{ user.username }}</b> | {% if user.role == "user" %}
   <span style="color: lightgreen">{{ user.role }}</span>

@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block title %}New Post{% endblock %} {% block
-leftheader %} >
+metatags %}
+<meta name="og:title" value="Post a new reply" />
+{% endblock %} {% block leftheader %} >
 <a href="{{ url_for('view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >
