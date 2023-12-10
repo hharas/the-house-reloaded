@@ -306,8 +306,16 @@ def login():
                 return redirect(request.args.get("referer", url_for("index")))
 
     if register_form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(
-            register_form.password.data)
+        if db.engine.dialect.name == "postgresql":
+            hashed_password = bcrypt.generate_password_hash(
+                register_form.password.data
+            ).decode("utf-8")
+        
+        elif db.engine.dialect.name == "sqlite":
+            hashed_password = bcrypt.generate_password_hash(
+                register_form.password.data
+            )
+
         new_user = User(username=register_form.username.data,
                         password=hashed_password)
         db.session.add(new_user)
