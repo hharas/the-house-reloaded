@@ -3,6 +3,7 @@ The House reloaded
 """
 
 import os
+import sys
 from typing import List, Optional
 from uuid import uuid4
 
@@ -21,6 +22,11 @@ from wtforms import (FileField, PasswordField, StringField, SubmitField,
 from wtforms.validators import InputRequired, Length, ValidationError
 
 load_dotenv()
+
+
+def eprint(*args, **kwargs):
+    """Print message to stderr"""
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def generate_uploads_filename(file_data) -> str:
@@ -109,8 +115,11 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
         self.bio = None
 
         if self.picture_filename:
-            os.remove(os.path.join(
-                app.config["UPLOADS_DIRECTORY"], self.picture_filename))
+            try:
+                os.remove(os.path.join(
+                    app.config["UPLOADS_DIRECTORY"], self.picture_filename))
+            except FileNotFoundError as error:
+                eprint(error)
 
 
 class Category(db.Model):  # pylint: disable=too-few-public-methods
@@ -148,8 +157,11 @@ class Thread(db.Model):  # pylint: disable=too-few-public-methods
         self.content = ""
 
         if self.attachment_filename:
-            os.remove(os.path.join(
-                app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
+            try:
+                os.remove(os.path.join(
+                    app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
+            except FileNotFoundError as error:
+                eprint(error)
 
 
 class Post(db.Model):  # pylint: disable=too-few-public-methods
@@ -171,8 +183,11 @@ class Post(db.Model):  # pylint: disable=too-few-public-methods
         self.content = ""
 
         if self.attachment_filename:
-            os.remove(os.path.join(
-                app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
+            try:
+                os.remove(os.path.join(
+                    app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
+            except FileNotFoundError as error:
+                eprint(error)
 
 
 class RegisterForm(FlaskForm):
@@ -397,8 +412,11 @@ def settings():
 
         if form.profile_picture_file.data:
             if user.picture_filename:
-                os.remove(os.path.join(
-                    app.config["UPLOADS_DIRECTORY"], user.picture_filename))
+                try:
+                    os.remove(os.path.join(
+                        app.config["UPLOADS_DIRECTORY"], user.picture_filename))
+                except FileNotFoundError as error:
+                    eprint(error)
 
             profile_picture_filename = generate_uploads_filename(
                 form.profile_picture_file.data)
