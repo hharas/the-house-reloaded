@@ -55,9 +55,9 @@ or current_user.id == thread.creator) %}
   <a href="{{ url_for('uploads', filename=thread.attachment_filename) }}"
     >{{ thread.attachment_filename }}</a
   >
-  {% endif %} {% endif %} {% if not thread.deleted %}
+  {% endif %} {% endif %}
   <hr />
-  {% if not current_user.is_authenticated %}
+  {% if not thread.deleted %} {% if not current_user.is_authenticated %}
   <a href="{{ url_for('login') + '?referer=' + request.path }}">login</a> in
   order to post replies. {% else %}
   <form
