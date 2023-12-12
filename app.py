@@ -508,7 +508,8 @@ def view_category(cat_title: str):
     category = Category.query.filter_by(title=cat_title).first()
 
     if category:
-        threads = Thread.query.filter_by(cat_id=category.id).all()
+        threads = Thread.query.filter_by(
+            cat_id=category.id, deleted=False).all()
 
         for thread in threads:
             thread.posts = []
