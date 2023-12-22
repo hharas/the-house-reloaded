@@ -108,11 +108,10 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     def delete(self):
-        """Delete user information and flag the user as deleted"""
+        """Demote the user and flag him as deleted"""
 
         self.deleted = True
         self.role = "user"
-        self.bio = None
 
         if self.picture_filename:
             try:
