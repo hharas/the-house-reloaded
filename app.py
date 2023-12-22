@@ -68,6 +68,15 @@ bcrypt = Bcrypt(app)
 os.makedirs(app.config["UPLOADS_DIRECTORY"], exist_ok=True)
 
 
+def delete_upload(filename: str):
+    """Delete an uploaded file"""
+    try:
+        os.remove(os.path.join(
+            app.config["UPLOADS_DIRECTORY"], filename))
+    except FileNotFoundError as error:
+        eprint(error)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     """Callback function for loading users from the database"""
@@ -114,11 +123,7 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
         self.role = "user"
 
         if self.picture_filename:
-            try:
-                os.remove(os.path.join(
-                    app.config["UPLOADS_DIRECTORY"], self.picture_filename))
-            except FileNotFoundError as error:
-                eprint(error)
+            delete_upload(self.picture_filename)
 
 
 class Category(db.Model):  # pylint: disable=too-few-public-methods
@@ -156,11 +161,7 @@ class Thread(db.Model):  # pylint: disable=too-few-public-methods
         self.content = ""
 
         if self.attachment_filename:
-            try:
-                os.remove(os.path.join(
-                    app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
-            except FileNotFoundError as error:
-                eprint(error)
+            delete_upload(self.attachment_filename)
 
 
 class Post(db.Model):  # pylint: disable=too-few-public-methods
@@ -182,11 +183,7 @@ class Post(db.Model):  # pylint: disable=too-few-public-methods
         self.content = ""
 
         if self.attachment_filename:
-            try:
-                os.remove(os.path.join(
-                    app.config["UPLOADS_DIRECTORY"], self.attachment_filename))
-            except FileNotFoundError as error:
-                eprint(error)
+            delete_upload(self.attachment_filename)
 
 
 class RegisterForm(FlaskForm):
@@ -417,11 +414,7 @@ def settings():
 
         if form.profile_picture_file.data:
             if user.picture_filename:
-                try:
-                    os.remove(os.path.join(
-                        app.config["UPLOADS_DIRECTORY"], user.picture_filename))
-                except FileNotFoundError as error:
-                    eprint(error)
+                delete_upload(user.picture_filename)
 
             profile_picture_filename = generate_uploads_filename(
                 form.profile_picture_file.data)
