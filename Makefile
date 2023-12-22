@@ -8,7 +8,7 @@ AUTOPEP8 = $(VENV)/bin/autopep8
 PYLINT = $(VENV)/bin/pylint
 ISORT = $(VENV)/bin/isort
 
-.PHONY: run lint format fl clean
+.PHONY: run debug setup fl lint format clean db-clean up-clean
 
 run:
 	$(GUNICORN) app:app
