@@ -125,7 +125,7 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
 class Category(db.Model):  # pylint: disable=too-few-public-methods
     """A Housean category or board"""
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(10), nullable=False, unique=True)
+    title = db.Column(db.String(20), nullable=False, unique=True)
     description = db.Column(db.String(150), nullable=False)
     deleted = db.Column(db.Boolean, nullable=False, default=False)
 
@@ -203,6 +203,9 @@ class RegisterForm(FlaskForm):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError("That username already exists")
 
+        if ' ' in field.data:
+            raise ValidationError("Username contains spaces")
+
 
 class LoginForm(FlaskForm):
     """Registration form class"""
@@ -234,7 +237,7 @@ class LoginForm(FlaskForm):
 class CreateCategoryForm(FlaskForm):
     """New Category form class"""
     title = StringField(validators=[InputRequired(), Length(
-        min=2, max=10)])
+        min=2, max=20)])
     description = StringField(validators=[InputRequired(), Length(
         min=2, max=100)])
     submit = SubmitField("create")
@@ -243,6 +246,9 @@ class CreateCategoryForm(FlaskForm):
         """Make sure the new title isn't used"""
         if Category.query.filter_by(title=field.data).first():
             raise ValidationError("Title must be unique")
+
+        if ' ' in field.data:
+            raise ValidationError("Title contains spaces")
 
 
 class CreateThreadForm(FlaskForm):

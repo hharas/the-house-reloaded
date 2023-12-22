@@ -1,6 +1,8 @@
 VENV = venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip3
+FLASK = $(VENV)/bin/flask
+GUNICORN = $(VENV)/bin/gunicorn
 
 AUTOPEP8 = $(VENV)/bin/autopep8
 PYLINT = $(VENV)/bin/pylint
@@ -9,7 +11,10 @@ ISORT = $(VENV)/bin/isort
 .PHONY: run lint format fl clean
 
 run:
-	$(PYTHON) app.py
+	$(GUNICORN) app:app
+
+debug:
+	$(FLASK) run --reload --debug
 
 setup: requirements.txt
 	python3 -m venv $(VENV)
