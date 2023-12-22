@@ -55,9 +55,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("THR_DATABASE_URI")
 app.config["SECRET_KEY"] = os.getenv("THR_SECRET_KEY")
 app.config["STATIC_DIRECTORY"] = os.getenv("THR_STATIC_DIRECTORY")
 app.config["UPLOADS_DIRECTORY"] = os.getenv("THR_UPLOADS_DIRECTORY")
-app.config["PREVIEWABLE_EXTENSIONS"] = ["png", "jpeg", "jpg", "gif", "mp4",
-                                        "webm", "mp3", "ogg", "wav", "flac",
-                                        "alac", "m4a", "aac", "svg"]
+app.config["PREVIEWABLE_EXTENSIONS"] = ["png", "jpeg", "jpg", "webp", "gif",
+                                        "mp4", "webm", "mp3", "ogg", "wav",
+                                        "flac", "alac", "m4a", "aac", "svg"]
 app.jinja_env.filters['render_content'] = render_content
 
 login_manager = LoginManager()
@@ -106,6 +106,8 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
     """A Housean user"""
     id = db.Column(db.String(36), primary_key=True,
                    default=lambda: str(uuid4()), unique=True)
+    token = db.Column(db.String(36),
+                      default=lambda: str(uuid4()), unique=True)
     username = db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.Text, nullable=False)
     joined_date = db.Column(db.DateTime, nullable=False,
@@ -1014,7 +1016,7 @@ def uploads(filename: str):
     """Serve uploaded files"""
 
     if not os.path.exists(os.path.join(app.config["UPLOADS_DIRECTORY"], filename)):
-        return send_from_directory(app.config["STATIC_DIRECTORY"], "filenotfound.jpg")
+        return redirect(url_for("static", filename="filenotfound.jpg"))
 
     if request.args.get("download") == "true":
         return send_from_directory(app.config["UPLOADS_DIRECTORY"], filename, as_attachment=True)
