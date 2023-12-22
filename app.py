@@ -791,7 +791,7 @@ def view_thread(cat_title: str, thread_id: int):
                 if post.content:
                     html += f"""<div class="comment-content">{render_content(post.content)}</div>"""
 
-                if post.attachment_filename:
+                if post.attachment_filename and not post.deleted:
                     attachment_url = url_for(
                         'uploads', filename=post.attachment_filename)
                     if post.attachment_filename.split('.')[-1] in \
