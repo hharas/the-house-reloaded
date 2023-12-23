@@ -331,7 +331,9 @@ def promote():
 
                     return redirect(url_for("index"))
 
-    return render_template("403.html"), 403
+                return render_template("403.html"), 403
+
+    return render_template("404.html"), 404
 
 
 @app.get("/toggle-theme")
@@ -405,7 +407,7 @@ def settings():
     """Account settings page"""
 
     if not current_user.is_authenticated:
-        return render_template("403.html"), 403
+        return render_template("404.html"), 404
 
     class SettingsForm(FlaskForm):
         """Settings form class"""
@@ -510,7 +512,9 @@ def create_category():
         if current_user.role == "admin":
             return render_template("new-category.html", form=form)
 
-    return render_template("403.html"), 403
+        return render_template("403.html"), 403
+
+    return render_template("404.html"), 404
 
 
 @app.route("/<cat_title>/", strict_slashes=False)
@@ -861,13 +865,12 @@ def delete_post(cat_title: str, thread_id: int, post_id: int):
     post = Post.query.filter_by(id=post_id).first()
     author = User.query.filter_by(id=post.author).first()
 
-    if current_user.is_authenticated:
-        if current_user.role == "admin" or \
-            (current_user.role == "moderator" and author.role == "user") or \
-                current_user.id == author.id:
-
-            if post.cat_id == category.id and post.thread_id == thread.id:
-                if not post.deleted:
+    if post.cat_id == category.id and post.thread_id == thread.id:
+        if not post.deleted:
+            if current_user.is_authenticated:
+                if current_user.role == "admin" or \
+                    (current_user.role == "moderator" and author.role == "user") or \
+                        current_user.id == author.id:
                     if request.args.get("confirm") == "yes":
                         post.delete()
                         db.session.add(post)
@@ -889,9 +892,9 @@ def delete_post(cat_title: str, thread_id: int, post_id: int):
                         author=author
                     )
 
-            return render_template("404.html"), 404
+            return render_template("403.html"), 403
 
-    return render_template("403.html"), 403
+    return render_template("404.html"), 404
 
 
 @app.get("/<cat_title>/<int:thread_id>/delete")
@@ -902,12 +905,12 @@ def delete_thread(cat_title: str, thread_id: int):
     thread = Thread.query.filter_by(id=thread_id).first()
     creator = User.query.filter_by(id=thread.creator).first()
 
-    if current_user.is_authenticated:
-        if current_user.role == "admin" or \
-            (current_user.role == "moderator" and creator.role == "user") or \
-                current_user.id == creator.id:
-            if thread.cat_id == category.id:
-                if not thread.deleted:
+    if thread.cat_id == category.id:
+        if not thread.deleted:
+            if current_user.is_authenticated:
+                if current_user.role == "admin" or \
+                    (current_user.role == "moderator" and creator.role == "user") or \
+                        current_user.id == creator.id:
                     if request.args.get("confirm") == "yes":
                         for post in Post.query.filter_by(thread_id=thread.id).all():
                             post.delete()
@@ -932,9 +935,9 @@ def delete_thread(cat_title: str, thread_id: int):
                         posts=Post.query.filter_by(thread_id=thread.id).all()
                     )
 
-            return render_template("404.html"), 404
+            return render_template("403.html"), 403
 
-    return render_template("403.html"), 403
+    return render_template("404.html"), 404
 
 
 @app.get("/<cat_title>/delete")
@@ -945,9 +948,9 @@ def delete_category(cat_title: str):
     threads = Thread.query.filter_by(cat_id=category.id).all()
     posts = Post.query.filter_by(cat_id=category.id).all()
 
-    if current_user.is_authenticated:
-        if current_user.role == "admin":
-            if not category.deleted:
+    if not category.deleted:
+        if current_user.is_authenticated:
+            if current_user.role == "admin":
                 if request.args.get("confirm") == "yes":
                     for post in posts:
                         if not post.deleted:
@@ -973,9 +976,9 @@ def delete_category(cat_title: str):
                     posts=posts
                 )
 
-            return render_template("404.html"), 404
+            return render_template("403.html"), 403
 
-    return render_template("403.html"), 403
+    return render_template("404.html"), 404
 
 
 @app.get("/~<username>/delete")
@@ -986,10 +989,10 @@ def delete_user(username: str):
     threads = Thread.query.filter_by(creator=user.id).all()
     posts = Post.query.filter_by(author=user.id).all()
 
-    if current_user.is_authenticated:
-        if current_user.role == "admin" or \
-                current_user.id == user.id:
-            if not user.deleted:
+    if not user.deleted:
+        if current_user.is_authenticated:
+            if current_user.role == "admin" or \
+                    current_user.id == user.id:
                 if request.args.get("confirm") == "yes":
                     for post in posts:
                         if not post.deleted:
@@ -1018,9 +1021,9 @@ def delete_user(username: str):
                     posts=posts,
                 )
 
-            return render_template("404.html"), 404
+            return render_template("403.html"), 403
 
-    return render_template("403.html"), 403
+    return render_template("404.html"), 404
 
 
 @app.get("/up/<path:filename>")
