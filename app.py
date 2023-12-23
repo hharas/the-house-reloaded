@@ -1065,11 +1065,25 @@ def uploads(filename: str):
     return send_from_directory(app.config["UPLOADS_DIRECTORY"], filename)
 
 
+@app.errorhandler(500)
+def servererror(_):
+    """Handle server errors"""
+
+    return render_template("500.html"), 500
+
+
 @app.errorhandler(404)
 def pagenotfound(_):
     """Handle viewing a non-existent page"""
 
     return render_template("404.html"), 404
+
+
+@app.errorhandler(405)
+def methodnotallowed(_):
+    """Handle using unallowed methods"""
+
+    return render_template("405.html"), 405
 
 
 if __name__ == "__main__":
