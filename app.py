@@ -331,8 +331,6 @@ def promote():
 
                     return redirect(url_for("index"))
 
-                return render_template("403.html"), 403
-
     return render_template("404.html"), 404
 
 
@@ -494,6 +492,34 @@ def view_user(username: str):
     return render_template("404.html"), 404
 
 
+@app.route("/~<username>/toggle-mod", methods=["GET", "POST"])
+def toggle_mod(username: str):
+    """View for toggling moderation permissions of a user"""
+    user = User.query.filter_by(username=username).first()
+
+    if current_user.is_authenticated:
+        if current_user.role == "admin":
+            if user.role != "admin":
+                if request.args.get("confirm") == "yes":
+                    user.role = "moderator" if user.role == "user" else "user"
+
+                    db.session.add(user)
+                    db.session.commit()
+
+                    return redirect(url_for("view_user", username=user.username))
+
+                return render_template(
+                    "toggle-mod.html",
+                    user=user
+                )
+
+            return render_template("400.html"), 400
+
+        return render_template("403.html"), 403
+
+    return render_template("401.html"), 401
+
+
 @app.route("/new", methods=["GET", "POST"])
 def create_category():
     """Create category page"""
@@ -514,7 +540,7 @@ def create_category():
 
         return render_template("403.html"), 403
 
-    return render_template("404.html"), 404
+    return render_template("401.html"), 401
 
 
 @app.route("/<cat_title>/", strict_slashes=False)
@@ -598,7 +624,7 @@ def create_thread(cat_title: str):
             category=category
         )
 
-    return render_template("403.html"), 403
+    return render_template("401.html"), 401
 
 
 @app.route("/<cat_title>/<int:thread_id>/new", methods=["GET", "POST"])
@@ -680,7 +706,7 @@ def create_post(cat_title: str, thread_id: int):
             reply_to=reply_to
         )
 
-    return render_template("403.html"), 403
+    return render_template("401.html"), 401
 
 
 @app.get("/<cat_title>/<int:thread_id>/", strict_slashes=False)
@@ -892,8 +918,8 @@ def delete_post(cat_title: str, thread_id: int, post_id: int):
                         author=author
                     )
 
-            return render_template("403.html"), 403
-
+                return render_template("403.html"), 403
+            return render_template("401.html"), 401
     return render_template("404.html"), 404
 
 
@@ -935,8 +961,8 @@ def delete_thread(cat_title: str, thread_id: int):
                         posts=Post.query.filter_by(thread_id=thread.id).all()
                     )
 
-            return render_template("403.html"), 403
-
+                return render_template("403.html"), 403
+            return render_template("401.html"), 401
     return render_template("404.html"), 404
 
 
@@ -977,7 +1003,7 @@ def delete_category(cat_title: str):
                 )
 
             return render_template("403.html"), 403
-
+        return render_template("401.html"), 401
     return render_template("404.html"), 404
 
 
@@ -1022,7 +1048,7 @@ def delete_user(username: str):
                 )
 
             return render_template("403.html"), 403
-
+        return render_template("401.html"), 401
     return render_template("404.html"), 404
 
 

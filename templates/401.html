@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% block title %}401{% endblock %} {% block metatags
+%}
+<meta name="og:title" value="Page not found" />
+{% endblock %} {% block main %}
+<div class="main">
+  <h1>401</h1>
+  <p><a href="{{ url_for('login') }}">Login</a> in order for this to work!</p>
+</div>
+{% endblock %}
