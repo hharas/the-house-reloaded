@@ -13,8 +13,8 @@
       type="text/css"
       href="{% if session['theme'] == 'dark' %} {{ url_for('static', filename='dark-theme.css') }} {% else %} {{ url_for('static', filename='light-theme.css') }} {% endif %}"
     />
-    <title>{% block title %}{% endblock %} • The House</title>
-    <meta name="og:site_name" value="The House" />
+    <title>{% block title %}{% endblock %} • {{ config["SITE_NAME"] }}</title>
+    <meta name="og:site_name" value="{{ config['SITE_NAME'] }}" />
     <meta name="og:url" value="{{ request.url }}" />
     {% block metatags %} {% endblock %}
   </head>
@@ -24,7 +24,7 @@
         <td>
           <p>
             <b>
-              <a href="{{ url_for('index') }}">The House</a
+              <a href="{{ url_for('index') }}">{{ config["SITE_NAME"] }}</a
               ><a href="{{ url_for('about') }}">¹</a>
               {% block leftheader %}{% endblock %}
             </b>

@@ -51,14 +51,24 @@ def render_content(value: str) -> str:
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("THR_DATABASE_URI")
+app.config["SITE_NAME"] = os.getenv("THR_SITE_NAME") or "The House"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+    "THR_DATABASE_URI") or "sqlite:///thehouse.db"
 app.config["SECRET_KEY"] = os.getenv("THR_SECRET_KEY")
-app.config["STATIC_DIRECTORY"] = os.getenv("THR_STATIC_DIRECTORY")
-app.config["UPLOADS_DIRECTORY"] = os.getenv("THR_UPLOADS_DIRECTORY")
+app.config["STATIC_DIRECTORY"] = os.getenv("THR_STATIC_DIRECTORY") or "static"
+app.config["UPLOADS_DIRECTORY"] = os.getenv(
+    "THR_UPLOADS_DIRECTORY") or "uploads"
+app.config["ENABLE_ADMIN_KEY"] = os.getenv("THR_ENABLE_ADMIN_KEY") == "yes"
+app.config["ADMIN_KEY"] = None if not app.config["ENABLE_ADMIN_KEY"] else os.getenv(
+    "THR_ADMIN_KEY")
 app.config["PREVIEWABLE_EXTENSIONS"] = ["png", "jpeg", "jpg", "webp", "gif",
                                         "mp4", "webm", "mp3", "ogg", "wav",
                                         "flac", "alac", "m4a", "aac", "svg"]
 app.jinja_env.filters['render_content'] = render_content
+
+if not app.config["SECRET_KEY"]:
+    eprint("No app secret key found! Did you set a THR_SECRET_KEY environment variable?")
+    sys.exit(1)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -310,14 +320,16 @@ def index():
 def promote():
     """Endpoint that promotes a user to admin if he has an admin key"""
     if current_user.is_authenticated:
-        if request.args.get("key") == os.getenv("THR_ADMIN_KEY"):
-            user = User.query.filter_by(id=current_user.id).first()
-            user.role = "admin"
+        if app.config["ENABLE_ADMIN_KEY"]:
+            if app.config["ADMIN_KEY"] is not None:
+                if request.args.get("key") == app.config["ADMIN_KEY"]:
+                    user = User.query.filter_by(id=current_user.id).first()
+                    user.role = "admin"
 
-            db.session.add(user)
-            db.session.commit()
+                    db.session.add(user)
+                    db.session.commit()
 
-            return redirect(url_for("index"))
+                    return redirect(url_for("index"))
 
     return render_template("403.html"), 403
 
