@@ -2,12 +2,12 @@
 metatags %}
 <meta name="og:title" value="Delete this post" />
 {% endblock %} {% block leftheader %} >
-<a href="{{ url_for('view_category', cat_title=category.title) }}"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >
 >
 <a
-  href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
+  href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) }}"
 >
   {{ thread.title }}</a
 >{% endblock %} {% block main %}
@@ -23,14 +23,14 @@ metatags %}
         <div class="tooltip-wrap">
           <a
             style="color: #808080"
-            href="{{ url_for('view_user', username=author.username) }}"
+            href="{{ url_for('main.view_user', username=author.username) }}"
             >{{ author.username }}</a
           >
         </div>
         <p class="comment-tr">
           <a
             style="color: #808080"
-            href="{{ url_for('view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
+            href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
           >
             {{ post.creation_date }}
           </a>
@@ -38,14 +38,14 @@ metatags %}
         {% if not post.deleted %}
         <p class="comment-tr">
           <a
-            href="{{ url_for('create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
+            href="{{ url_for('main.create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
             >[reply]</a
           >
         </p>
         {% endif %} {% if post.attachment_filename and not post.deleted %}
         <p class="comment-tr">
           <a
-            href="{{ url_for('uploads', filename=post.attachment_filename) + '?download=true' }}"
+            href="{{ url_for('main.uploads', filename=post.attachment_filename) + '?download=true' }}"
             >[save]</a
           >
         </p>
@@ -57,11 +57,11 @@ metatags %}
       post.attachment_filename.split(".")|last in
       config["PREVIEWABLE_EXTENSIONS"] %}
       <embed
-        src="{{ url_for('uploads', filename=post.attachment_filename) }}"
+        src="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
         style="max-height: 300px; margin-top: 5px"
       />
       {% else %}
-      <a href="{{ url_for('uploads', filename=post.attachment_filename) }}"
+      <a href="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
         >{{ post.attachment_filename }}</a
       >
       {% endif %} {% endif %}
@@ -69,7 +69,7 @@ metatags %}
   </div>
   <br />
   <a
-    href="{{ url_for('delete_post', cat_title=category.title, thread_id=thread.id, post_id=post.id) + '?confirm=yes' }}"
+    href="{{ url_for('main.delete_post', cat_title=category.title, thread_id=thread.id, post_id=post.id) + '?confirm=yes' }}"
     ><button style="color: black">Delete post</button></a
   >
 </div>

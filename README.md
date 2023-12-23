@@ -19,6 +19,8 @@ A python rewrite in flask of the original [The House](https://github.com/hharas/
 6. Visit `/login` and create an account.
 7. Visit `/promote?key=youradminkey` to become an administrator.
 
+Uploads by users will be stored in `uploads/`, static files such as styles and the favicons are present in `static/`.
+
 ## License
 
 The House Reloaded is licensed under the GNU General Public License V3.0.

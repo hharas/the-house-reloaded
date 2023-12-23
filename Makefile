@@ -23,12 +23,12 @@ setup: requirements.txt
 fl: format lint
 
 lint:
-	$(PYLINT) -f colorized *.py
+	$(PYLINT) -f colorized *.py thehouse/*.py
 
 format:
-	prettier -w templates/*.html
-	$(ISORT) *.py
-	$(AUTOPEP8) -i *.py
+	prettier -w thehouse/templates/*.html
+	$(ISORT) *.py thehouse/*.py
+	$(AUTOPEP8) -i *.py thehouse/*.py
 
 clean:
 	rm -rf __pycache__

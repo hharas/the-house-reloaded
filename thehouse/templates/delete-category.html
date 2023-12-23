@@ -2,7 +2,7 @@
 block metatags %}
 <meta name="og:title" value="Delete this category" />
 {% endblock %} {% block leftheader %} >
-<a href="{{ url_for('view_category', cat_title=category.title) }}"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >
 {% endblock %} {% block main %}
@@ -16,7 +16,7 @@ block metatags %}
   </p>
   <br />
   <a
-    href="{{ url_for('delete_category', cat_title=category.title) + '?confirm=yes' }}"
+    href="{{ url_for('main.delete_category', cat_title=category.title) + '?confirm=yes' }}"
     ><button style="color: black">Delete category</button></a
   >
 </div>

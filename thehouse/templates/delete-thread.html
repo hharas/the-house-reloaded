@@ -2,12 +2,12 @@
 metatags %}
 <meta name="og:title" value="Delete this thread" />
 {% endblock %} {% block leftheader %} >
-<a href="{{ url_for('view_category', cat_title=category.title) }}"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >
 >
 <a
-  href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
+  href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) }}"
 >
   {{ thread.title }}</a
 >{% endblock %} {% block main %}
@@ -20,7 +20,7 @@ metatags %}
   </p>
   <br />
   <a
-    href="{{ url_for('delete_thread', cat_title=category.title, thread_id=thread.id) + '?confirm=yes' }}"
+    href="{{ url_for('main.delete_thread', cat_title=category.title, thread_id=thread.id) + '?confirm=yes' }}"
     ><button style="color: black">Delete thread</button></a
   >
 </div>

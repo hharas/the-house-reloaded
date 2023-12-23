@@ -12,7 +12,7 @@ metatags %}
     current profile picture: {% if current_user.picture_filename %}
     <br />
     <img
-      src="{{ url_for('uploads', filename=current_user.picture_filename) }}"
+      src="{{ url_for('main.uploads', filename=current_user.picture_filename) }}"
       style="max-height: 300px"
     />
     {% else %} <b>not set!</b> {% endif %}

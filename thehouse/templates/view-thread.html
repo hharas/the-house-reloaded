@@ -5,10 +5,10 @@ metatags %}
 {% if thread.attachment_filename %}
 <meta
   name="og:image"
-  value="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+  value="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
 />
 {% endif %} {% endblock %} {% block leftheader %} >
-<a href="{{ url_for('view_category', cat_title=category.title) }}"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >
 {% endblock %} {% block rightheader %} {% if current_user.is_authenticated %} {%
@@ -16,11 +16,11 @@ if not thread.deleted and (current_user.role == "admin" or (current_user.role ==
 "moderator" and User.query.filter_by(id=thread.creator).first().role != "admin")
 or current_user.id == thread.creator) %}
 <a
-  href="{{ url_for('delete_thread', cat_title=category.title, thread_id=thread.id) }}"
+  href="{{ url_for('main.delete_thread', cat_title=category.title, thread_id=thread.id) }}"
   >delete thread</a
 >
 | {% endif %}
-<a href="{{ url_for('view_category', cat_title=category.title) }}/new"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}/new"
   >create thread</a
 >
 | {% endif %} {% endblock %} {% block main %}
@@ -33,7 +33,7 @@ or current_user.id == thread.creator) %}
   <p style="font-size: 13px">
     created by {% if creator.deleted %}
     <span style="font-style: italic">[deleted]</span> {% else %}
-    <a href="{{ url_for('view_user', username=creator.username) }}"
+    <a href="{{ url_for('main.view_user', username=creator.username) }}"
       >{{ creator.username }}</a
     >
     {% endif %} at {{ thread.creation_date }} | Viewed {{ thread.views }} {% if
@@ -48,20 +48,20 @@ or current_user.id == thread.creator) %}
   {% if thread.attachment_filename.split(".")|last in
   config["PREVIEWABLE_EXTENSIONS"] %}
   <embed
-    src="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+    src="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
     style="max-height: 400px; margin-top: 5px"
   />
   {% else %}
-  <a href="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+  <a href="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
     >{{ thread.attachment_filename }}</a
   >
   {% endif %} {% endif %}
   <hr />
   {% if not thread.deleted %} {% if not current_user.is_authenticated %}
-  <a href="{{ url_for('login') + '?referer=' + request.path }}">login</a> in
-  order to post replies. {% else %}
+  <a href="{{ url_for('main.login') + '?referer=' + request.path }}">login</a>
+  in order to post replies. {% else %}
   <form
-    action="{{ url_for('create_post', cat_title=category.title, thread_id=thread.id) }}"
+    action="{{ url_for('main.create_post', cat_title=category.title, thread_id=thread.id) }}"
     method="post"
     enctype="multipart/form-data"
   >

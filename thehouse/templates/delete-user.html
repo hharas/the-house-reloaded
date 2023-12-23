@@ -2,7 +2,7 @@
 metatags %}
 <meta name="og:title" value="Delete this user account" />
 {% endblock %} {% block leftheader %} >
-<a href="{{ url_for('view_user', username=user.username) }}"
+<a href="{{ url_for('main.view_user', username=user.username) }}"
   >~{{ user.username }}</a
 >
 {% endblock %} {% block main %}
@@ -16,7 +16,7 @@ metatags %}
   </p>
   <br />
   <a
-    href="{{ url_for('delete_user', username=user.username) + '?confirm=yes' }}"
+    href="{{ url_for('main.delete_user', username=user.username) + '?confirm=yes' }}"
     ><button style="color: black">Delete account</button></a
   >
 </div>

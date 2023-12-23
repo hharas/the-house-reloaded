@@ -3,17 +3,19 @@ block metatags %}
 <meta name="og:title" value="~{{ user.username }}" />
 <meta
   name="og:image"
-  value="{% if user.picture_filename %} {{ url_for('uploads', filename=user.picture_filename) }} {% else %} {{ url_for('static', filename='default.png') }} {% endif %}"
+  value="{% if user.picture_filename %} {{ url_for('main.uploads', filename=user.picture_filename) }} {% else %} {{ url_for('static', filename='default.png') }} {% endif %}"
 />
 {% endblock %} {% block leftheader %} <span>> ~{{ user.username }}</span> {%
 endblock %} {% block rightheader %} {% if current_user.role == "admin" or
 current_user.id == user.id %}
-<a href="{{ url_for('delete_user', username=user.username) }}"
+<a href="{{ url_for('main.delete_user', username=user.username) }}"
   >delete account</a
 >
 | {% endif %} {% if current_user.role == "admin" and user.role != "admin" %}
-<a href="{{ url_for('toggle_mod', username=user.username) }}">toggle mod</a> |
-{% endif %} {% endblock %} {% block main %}
+<a href="{{ url_for('main.toggle_mod', username=user.username) }}"
+  >toggle mod</a
+>
+| {% endif %} {% endblock %} {% block main %}
 <div class="main">
   <b>{{ user.username }}</b> | {% if user.role == "user" %}
   <span style="color: lightgreen">{{ user.role }}</span>
@@ -37,7 +39,7 @@ current_user.id == user.id %}
   {% endif %}
   <br />
   <img
-    src="{% if user.picture_filename %} {{ url_for('uploads', filename=user.picture_filename) }} {% else %} {{ url_for('static', filename='default.png') }} {% endif %}"
+    src="{% if user.picture_filename %} {{ url_for('main.uploads', filename=user.picture_filename) }} {% else %} {{ url_for('static', filename='default.png') }} {% endif %}"
     style="max-height: 300px"
   />
   {% if activities|length > 0 %}
@@ -50,12 +52,12 @@ current_user.id == user.id %}
   Category.query.filter_by(id=post.cat_id).first() %} {% set thread =
   Thread.query.filter_by(id=post.thread_id).first() %} {% if not post.deleted %}
   <h4>
-    <a href="{{ url_for('view_category', cat_title=category.title) }}"
+    <a href="{{ url_for('main.view_category', cat_title=category.title) }}"
       >{{ category.title }}/</a
     >
     >
     <a
-      href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
+      href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) }}"
       >{{ thread.title }}</a
     >
   </h4>
@@ -71,7 +73,7 @@ current_user.id == user.id %}
       <p class="comment-tr">
         <a
           style="color: #808080"
-          href="{{ url_for('view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
+          href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
         >
           {{ post.creation_date }}
         </a>
@@ -79,14 +81,14 @@ current_user.id == user.id %}
       {% if current_user.is_authenticated and not post.deleted %}
       <p class="comment-tr">
         <a
-          href="{{ url_for('create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
+          href="{{ url_for('main.create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
           >[reply]</a
         >
       </p>
       {% endif %} {% if post.attachment_filename and not post.deleted %}
       <p class="comment-tr">
         <a
-          href="{{ url_for('uploads', filename=post.attachment_filename) + '?download=true' }}"
+          href="{{ url_for('main.uploads', filename=post.attachment_filename) + '?download=true' }}"
           >[save]</a
         >
       </p>
@@ -95,7 +97,7 @@ current_user.id == user.id %}
       current_user.id == post.author) %}
       <p class="comment-tr">
         <a
-          href="{{ url_for('delete_post', cat_title=category.title, thread_id=post.thread_id, post_id=post.id) }}"
+          href="{{ url_for('main.delete_post', cat_title=category.title, thread_id=post.thread_id, post_id=post.id) }}"
           >[delete]</a
         >
       </p>
@@ -109,11 +111,11 @@ current_user.id == user.id %}
     post.attachment_filename.split(".")|last in config["PREVIEWABLE_EXTENSIONS"]
     %}
     <embed
-      src="{{ url_for('uploads', filename=post.attachment_filename) }}"
+      src="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
       style="max-height: 300px; margin-top: 5px"
     />
     {% else %}
-    <a href="{{ url_for('uploads', filename=post.attachment_filename) }}"
+    <a href="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
       >{{ post.attachment_filename }}</a
     >
     {% endif %} {% endif %}
@@ -123,12 +125,12 @@ current_user.id == user.id %}
   Category.query.filter_by(id=thread.cat_id).first() %} {% if not thread.deleted
   %}
   <h4>
-    <a href="{{ url_for('view_category', cat_title=category.title) }}"
+    <a href="{{ url_for('main.view_category', cat_title=category.title) }}"
       >{{ category.title }}/</a
     >
     >
     <a
-      href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
+      href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) }}"
       >{{ thread.title }}<span
         style="color: #808080; font-size: 13px; margin-left: 5px"
         >{{ thread.creation_date }}</span
@@ -140,11 +142,11 @@ current_user.id == user.id %}
   thread.attachment_filename.split(".")|last in config["PREVIEWABLE_EXTENSIONS"]
   %}
   <embed
-    src="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+    src="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
     style="max-height: 100px; margin-top: 5px"
   />
   {% else %}
-  <a href="{{ url_for('uploads', filename=thread.attachment_filename) }}"
+  <a href="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
     >{{ thread.attachment_filename }}</a
   >
   {% endif %} {% endif %}

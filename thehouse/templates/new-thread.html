@@ -2,7 +2,7 @@
 metatags %}
 <meta name="og:title" value="Create a new thread" />
 {% endblock %} {% block leftheader %} >
-<a href="{{ url_for('view_category', cat_title=category.title) }}"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}"
   >{{ category.title }}/</a
 >
 {% endblock %} {% block main %}

@@ -4,18 +4,18 @@
 {% endblock %} {% block leftheader %} <span>> {{ category.title }}/</span> {%
 endblock %} {% block rightheader %} {% if current_user.is_authenticated %} {% if
 current_user.role == "admin" %}
-<a href="{{ url_for('delete_category', cat_title=category.title) }}"
+<a href="{{ url_for('main.delete_category', cat_title=category.title) }}"
   >delete category</a
 >
 | {% endif %}
-<a href="{{ url_for('view_category', cat_title=category.title) }}/new"
+<a href="{{ url_for('main.view_category', cat_title=category.title) }}/new"
   >create thread</a
 >
 | {% endif %} {% endblock%} {% block main %} {% if category.deleted %}
 <div class="main">
   <p>This category was deleted.</p>
 </div>
-{% endif %} {% if threads|length == 0 %}
+{% endif %} {% if threads|length == 0 and not category.deleted %}
 <div class="main">
   <p>There are no threads here.</p>
 </div>
@@ -26,7 +26,7 @@ current_user.role == "admin" %}
     <li class="row">
       <p class="title">
         <a
-          href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) }}"
+          href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) }}"
           >{{ thread.title }}</a
         >
       </p>
@@ -34,7 +34,7 @@ current_user.role == "admin" %}
         <p>
           created by
           <a
-            href="{{ url_for('view_user', username=User.query.filter_by(id=thread.creator).first().username) }}"
+            href="{{ url_for('main.view_user', username=User.query.filter_by(id=thread.creator).first().username) }}"
             >{{ User.query.filter_by(id=thread.creator).first().username }}</a
           >
           at {{ thread.creation_date }} | viewed {{ thread.views }} times | {%
@@ -43,12 +43,12 @@ current_user.role == "admin" %}
           User.query.filter_by(id=last_post.author, deleted=False).first() %}
           last active user is
           <a
-            href="{{ url_for('view_user', username=last_active_user.username) }}"
+            href="{{ url_for('main.view_user', username=last_active_user.username) }}"
             >{{ last_active_user.username }}</a
           >
           at
           <a
-            href="{{ url_for('view_thread', cat_title=category.title, thread_id=thread.id) + '#' + last_post.id|string }}"
+            href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) + '#' + last_post.id|string }}"
             >{{ last_post.creation_date }}</a
           >
           {% endif %}

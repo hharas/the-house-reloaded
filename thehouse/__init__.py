@@ -1,0 +1,63 @@
+"""
+The House reloaded
+"""
+
+import os
+import sys
+from os import path
+from typing import List, Optional
+from uuid import uuid4
+
+import bleach
+from flask import (Flask, redirect, render_template, request,
+                   send_from_directory, session, url_for)
+from flask_bcrypt import Bcrypt
+from flask_login import (LoginManager, UserMixin, current_user, login_user,
+                         logout_user)
+from flask_sqlalchemy import SQLAlchemy
+
+from .before_request_callbacks import logout_if_deleted, set_default_theme
+from .config import Config
+from .error_handlers import (handle_method_not_allowed, handle_page_not_found,
+                             handle_server_error)
+from .extensions import bcrypt, db
+from .models import User
+from .routes import main
+from .user_callbacks import login_manager
+from .utils import eprint, render_content
+
+
+def register_blueprints(app):
+    """Register blueprints to app"""
+    app.register_blueprint(main)
+
+
+def create_app(config_class=Config):  # pylint: disable=unused-argument
+    """App init function"""
+    app = Flask(__name__, static_folder=path.join(path.pardir, "static"))
+    app.config.from_object(config_class)
+
+    os.makedirs(app.config["UPLOADS_DIRECTORY"], exist_ok=True)
+
+    if not app.config["SECRET_KEY"]:
+        raise ValueError(
+            "No app secret key found! Did you set a THR_SECRET_KEY environment variable?"
+        )
+
+    login_manager.init_app(app)
+    login_manager.login_view = "login"
+    db.init_app(app)
+    bcrypt.init_app(app)
+
+    register_blueprints(app)
+
+    app.before_request(set_default_theme)
+    app.before_request(logout_if_deleted)
+
+    app.errorhandler(404)(handle_page_not_found)
+    app.errorhandler(405)(handle_method_not_allowed)
+    app.errorhandler(500)(handle_server_error)
+
+    app.jinja_env.filters['render_content'] = render_content
+
+    return app, db
