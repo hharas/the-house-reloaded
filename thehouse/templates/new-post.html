@@ -24,11 +24,15 @@ metatags %}
     >
       <div class="top-comment">
         <div class="tooltip-wrap">
+          {% if author.deleted %}
+          <p style="color: #808080; font-style: italic">[deleted]</p>
+          {% else %}
           <a
             style="color: #808080"
             href="{{ url_for('main.view_user', username=author.username) }}"
             >{{ author.username }}</a
           >
+          {% endif %}
         </div>
         <p class="comment-tr">
           <a

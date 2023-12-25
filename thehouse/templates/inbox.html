@@ -1,0 +1,135 @@
+{% extends "base.html" %} {% block title %}Inbox{% endblock %} {% block metatags
+%}
+<meta name="og:title" value="User inbox" />
+{% endblock %} {% block main %}
+<div class="main">
+  <h3>User Inbox</h3>
+  <hr />
+  {% if inbox|length == 0 %}
+  <p>Nothing to see here!</p>
+  {% else %} {% for message in inbox %} {% set category = message.category %} {%
+  set thread = message.thread %} {% set original_post = message.original_post %}
+  {% set original_author = message.original_author %} {% set post = message.post
+  %} {% set author = message.author %}
+  <h4>
+    <a href="{{ url_for('main.view_category', cat_title=category.title) }}"
+      >{{ category.title }}/</a
+    >
+    >
+    <a
+      href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=thread.id) }}"
+      >{{ thread.title }}</a
+    >
+  </h4>
+  <div
+    id="{{ original_post.id }}"
+    class="comment"
+    style="margin-left: 10px; margin-top: 20px"
+  >
+    <div class="top-comment">
+      <div class="tooltip-wrap">
+        <span style="color: #808080">{{ original_author.username }}</span>
+      </div>
+      <p class="comment-tr">
+        <a
+          style="color: #808080"
+          href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=original_post.thread_id) + '#' + original_post.id|string }}"
+        >
+          {{ original_post.creation_date }}
+        </a>
+      </p>
+      {% if original_post.attachment_filename and not original_post.deleted %}
+      <p class="comment-tr">
+        <a
+          href="{{ url_for('main.uploads', filename=original_post.attachment_filename) + '?download=true' }}"
+          >[save]</a
+        >
+      </p>
+      {% endif %} {% if not original_post.deleted and (current_user.role ==
+      "admin" or (current_user.role == "moderator" and original_author.role !=
+      "admin") or current_user.id == original_post.author) %}
+      <p class="comment-tr">
+        <a
+          href="{{ url_for('main.delete_post', cat_title=category.title, thread_id=original_post.thread_id, post_id=original_post.id) }}"
+          >[delete]</a
+        >
+      </p>
+      {% endif %}
+    </div>
+    {% if original_post.deleted %}
+    <div class="comment-content" style="font-style: italic">[deleted]</div>
+    {% endif %} {% if original_post.content %}
+    <div class="comment-content">
+      {{ original_post.content|render_content|safe }}
+    </div>
+    {% endif %} {% if original_post.attachment_filename %} {% if
+    original_post.attachment_filename.split(".")|last in
+    config["PREVIEWABLE_EXTENSIONS"] %}
+    <embed
+      src="{{ url_for('main.uploads', filename=original_post.attachment_filename) }}"
+      style="max-height: 300px; margin-top: 5px"
+    />
+    {% else %}
+    <a
+      href="{{ url_for('main.uploads', filename=original_post.attachment_filename) }}"
+      >{{ original_post.attachment_filename }}</a
+    >
+    {% endif %} {% endif %}
+    <div class="comment-children">
+      <div id="{{ post.id }}" class="comment" style="margin-top: 10px">
+        <div class="top-comment">
+          <div class="tooltip-wrap">
+            <span style="color: #808080">{{ author.username }}</span>
+          </div>
+          <p class="comment-tr">
+            <a
+              style="color: #808080"
+              href="{{ url_for('main.view_thread', cat_title=category.title, thread_id=post.thread_id) + '#' + post.id|string }}"
+            >
+              {{ post.creation_date }}
+            </a>
+          </p>
+          {% if post.attachment_filename and not post.deleted %}
+          <p class="comment-tr">
+            <a
+              href="{{ url_for('main.uploads', filename=post.attachment_filename) + '?download=true' }}"
+              >[save]</a
+            >
+          </p>
+          {% endif %} {% if not post.deleted and (current_user.role == "admin"
+          or (current_user.role == "moderator" and author.role != "admin") or
+          current_user.id == post.author) %}
+          <p class="comment-tr">
+            <a
+              href="{{ url_for('main.delete_post', cat_title=category.title, thread_id=post.thread_id, post_id=post.id) }}"
+              >[delete]</a
+            >
+          </p>
+          {% endif %}
+        </div>
+        {% if post.deleted %}
+        <div class="comment-content" style="font-style: italic">[deleted]</div>
+        {% endif %} {% if post.content %}
+        <div class="comment-content">
+          {{ post.content|render_content|safe }}
+        </div>
+        {% endif %} {% if post.attachment_filename %} {% if
+        post.attachment_filename.split(".")|last in
+        config["PREVIEWABLE_EXTENSIONS"] %}
+        <embed
+          src="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
+          style="max-height: 300px; margin-top: 5px"
+        />
+        {% else %}
+        <a
+          href="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
+          >{{ post.attachment_filename }}</a
+        >
+        {% endif %} {% endif %}
+      </div>
+    </div>
+  </div>
+  <hr />
+  {% endfor %} {% endif %}
+</div>
+{% endblock %}

@@ -180,6 +180,46 @@ def settings():
     )
 
 
+@main.get("/inbox")
+def inbox():
+    """View for displaying the users inbox"""
+    if current_user.is_authenticated:
+        user_post_ids = []
+        inbox_messages = []
+
+        for user_post in Post.query.filter_by(author=current_user.id, deleted=False).all():
+            user_post_ids.append(user_post.id)
+
+        for post in Post.query.filter_by(deleted=False).all():
+            if post.author != current_user.id:
+                if post.replying_to:
+                    if post.replying_to in user_post_ids:
+                        original_post = Post.query.filter_by(
+                            id=post.replying_to).first()
+
+                        message = {
+                            "category":
+                            Category.query.filter_by(id=post.cat_id).first(),
+                            "thread":
+                            Thread.query.filter_by(id=post.thread_id).first(),
+                            "original_post":
+                            original_post,
+                            "original_author":
+                            User.query.filter_by(
+                                id=original_post.author).first(),
+                            "post":
+                            post,
+                            "author":
+                            User.query.filter_by(id=post.author).first(),
+                        }
+
+                        inbox_messages.append(message)
+
+        return render_template("inbox.html", inbox=inbox_messages)
+
+    return render_template("401.html"), 401
+
+
 @main.route("/~<username>/toggle-mod", methods=["GET", "POST"])
 def toggle_mod(username: str):
     """View for toggling moderation permissions of a user"""
@@ -360,7 +400,7 @@ def create_post(cat_title: str, thread_id: int):
                     (
                         category.id != replied_to.cat_id or
                         thread_id != replied_to.thread_id
-                    ) or replied_to.deleted:
+                    ):
                 return render_template("404.html"), 404
 
         if thread.deleted:
@@ -533,7 +573,7 @@ def view_thread(cat_title: str, thread_id: int):
                         </a>
                     </p>"""
 
-                if current_user.is_authenticated and not post.deleted:
+                if current_user.is_authenticated:
                     html += f"""
                     <p class="comment-tr">
                         <a

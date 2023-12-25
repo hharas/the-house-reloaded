@@ -78,7 +78,7 @@ current_user.id == user.id %}
           {{ post.creation_date }}
         </a>
       </p>
-      {% if current_user.is_authenticated and not post.deleted %}
+      {% if current_user.is_authenticated %}
       <p class="comment-tr">
         <a
           href="{{ url_for('main.create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"

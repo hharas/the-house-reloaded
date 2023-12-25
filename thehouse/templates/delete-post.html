@@ -35,14 +35,13 @@ metatags %}
             {{ post.creation_date }}
           </a>
         </p>
-        {% if not post.deleted %}
         <p class="comment-tr">
           <a
             href="{{ url_for('main.create_post', cat_title=category.title, thread_id=post.thread_id) + '?reply_to=' + post.id|string }}"
             >[reply]</a
           >
         </p>
-        {% endif %} {% if post.attachment_filename and not post.deleted %}
+        {% if post.attachment_filename and not post.deleted %}
         <p class="comment-tr">
           <a
             href="{{ url_for('main.uploads', filename=post.attachment_filename) + '?download=true' }}"
