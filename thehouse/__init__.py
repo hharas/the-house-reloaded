@@ -3,18 +3,8 @@ The House reloaded
 """
 
 import os
-import sys
-from os import path
-from typing import List, Optional
-from uuid import uuid4
 
-import bleach
-from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, session, url_for)
-from flask_bcrypt import Bcrypt
-from flask_login import (LoginManager, UserMixin, current_user, login_user,
-                         logout_user)
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
 
 from .api_routes import api
 from .before_request_callbacks import logout_if_deleted, set_default_theme
@@ -25,7 +15,7 @@ from .extensions import bcrypt, db
 from .models import User
 from .routes import main
 from .user_callbacks import login_manager
-from .utils import eprint, render_content
+from .utils import render_content
 
 
 def register_blueprints(app):
@@ -36,7 +26,7 @@ def register_blueprints(app):
 
 def create_app(config_class=Config):  # pylint: disable=unused-argument
     """App init function"""
-    app = Flask(__name__, static_folder=path.join(path.pardir, "static"))
+    app = Flask(__name__, static_folder=os.path.join(os.path.pardir, "static"))
     app.config.from_object(config_class)
 
     os.makedirs(app.config["UPLOADS_DIRECTORY"], exist_ok=True)
