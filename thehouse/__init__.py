@@ -16,6 +16,7 @@ from flask_login import (LoginManager, UserMixin, current_user, login_user,
                          logout_user)
 from flask_sqlalchemy import SQLAlchemy
 
+from .api_routes import api
 from .before_request_callbacks import logout_if_deleted, set_default_theme
 from .config import Config
 from .error_handlers import (handle_method_not_allowed, handle_page_not_found,
@@ -30,6 +31,7 @@ from .utils import eprint, render_content
 def register_blueprints(app):
     """Register blueprints to app"""
     app.register_blueprint(main)
+    app.register_blueprint(api)
 
 
 def create_app(config_class=Config):  # pylint: disable=unused-argument
