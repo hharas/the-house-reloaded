@@ -20,5 +20,10 @@ metatags %}
     <br />
     {{ form.submit }}
   </form>
+  <br />
+  <p class="account-token-wrap">
+    <b>(HOVER TO SEE ACCOUNT TOKEN)</b>
+    <span class="account-token">{{ current_user.token }}</span>
+  </p>
 </div>
 {% endblock %}
