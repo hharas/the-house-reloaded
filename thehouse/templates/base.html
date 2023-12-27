@@ -11,6 +11,11 @@
     <link
       rel="stylesheet"
       type="text/css"
+      href="{{ url_for('static', filename='general.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
       href="{% if session['theme'] == 'dark' %} {{ url_for('static', filename='dark-theme.css') }} {% else %} {{ url_for('static', filename='light-theme.css') }} {% endif %}"
     />
     <title>{% block title %}{% endblock %} • {{ config["SITE_NAME"] }}</title>

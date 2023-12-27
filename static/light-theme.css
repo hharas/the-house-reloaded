@@ -1,158 +1,41 @@
-@media only screen and (max-width: 600px) {
-    body {
-        font-family: Tahoma, Sans;
-    }
-}
-
-@media only screen and (min-width: 600px) {
-    body {
-        margin: 10px 120px;
-        font-family: Tahoma, Sans;
-    }
-}
-
-.bio {
-    color: black;
-}
-
 .tiny-pfp {
-    border: 1px solid black;
-    height: 10px;
+  border: 1px solid black;
 }
 
 a {
-    text-decoration: none;
-    color: black;
-}
-
-.delete-thread {
-    color: #808080;
-}
-
-h1,
-h4,
-ol {
-    margin: 0;
-}
-
-p {
-    margin: 1px 0;
-}
-
-.title {
-    font-size: 14px;
+  color: black;
 }
 
 .top-bar {
-    background-color: #a5a5a5;
-    width: 100%;
-    padding: 3px 20px;
+  background-color: #a5a5a5;
 }
 
 .index-main {
-    background-color: #F6F6EF;
-    padding: 2px 0px;
+  background-color: #f6f6ef;
 }
 
 .main {
-    background-color: #F6F6EF;
-    padding: 2px 20px;
-}
-
-.row {
-    padding: 2px 0px;
-}
-
-.bottom {
-    display: flex;
-    color: grey;
-    font-size: 12px;
-}
-
-.delete-account {
-    color: red;
-    text-decoration: underline;
-}
-
-/* Comments' Stuff */
-
-.comments {
-    margin: 40px 0;
-}
-
-.comment {
-    margin: 20px 0;
-}
-
-.row {
-    padding: 5px 0;
+  background-color: #f6f6ef;
 }
 
 .bottom,
 .top-comment {
-    display: flex;
-    color: grey;
-    font-size: 12px;
+  color: grey;
 }
-
-.timestamp {
-    padding-right: 10px;
-}
-
-.comment-tr {
-    padding-left: 10px;
-}
-
-.comment-content {
-    font-size: 14px;
-}
-
 .comment-content a {
-    text-decoration: underline;
-    color: blue;
-}
-
-.comment-children {
-    padding-left: 20px;
-}
-
-:target {
-    animation: highlight forwards;
+  color: blue;
 }
 
 @keyframes highlight {
-    to {
-        background-color: #f3f3b0;
-    }
+  to {
+    background-color: #f3f3b0;
+  }
 }
 
 .tooltip-wrap .tooltip-content {
-    display: none;
-    position: absolute;
-    margin-top: 1px;
-    background-color: #eeeeee;
-    padding: .4em;
-}
-
-.tooltip-wrap:hover .tooltip-content {
-    display: block;
-}
-
-.errors {
-    * {
-        color: red;
-    }
-}
-
-.account-token-wrap {
-    font-weight: bold;
-}
-
-.account-token-wrap .account-token {
-    display: none;
+  background-color: #eeeeee;
 }
 
 .account-token-wrap:hover .account-token {
-    display: block;
-    color: blue;
+  color: blue;
 }

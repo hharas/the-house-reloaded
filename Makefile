@@ -26,7 +26,7 @@ lint:
 	$(PYLINT) -f colorized *.py thehouse/*.py
 
 format:
-	prettier -w thehouse/templates/*.html
+	prettier -w thehouse/templates/*.html static/*.css
 	$(ISORT) *.py thehouse/*.py
 	$(AUTOPEP8) -i *.py thehouse/*.py
 
