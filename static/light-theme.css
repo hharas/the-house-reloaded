@@ -35,7 +35,3 @@ a {
 .tooltip-wrap .tooltip-content {
   background-color: #eeeeee;
 }
-
-.account-token-wrap:hover .account-token {
-  color: blue;
-}

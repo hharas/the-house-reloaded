@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Manage Token{% endblock %} {% block
+metatags %}
+<meta name="og:title" value="User inbox" />
+{% endblock %} {% block main %}
+<div class="main">
+  <h3>User token</h3>
+  <p>Your user token is:</p>
+  <p><b>{{ current_user.token }}</b></p>
+  <p>Do not share it with anybody!</p>
+  <br />
+  <p>
+    <a href="{{ url_for('main.manage_token') + '?regenerate=true' }}"
+      >Click here to regenerate it</a
+    >
+  </p>
+  <br />
+</div>
+{% endblock %}

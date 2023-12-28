@@ -5,6 +5,7 @@ Routes
 
 from os import path
 from typing import List, Optional
+from uuid import uuid4
 
 from flask import (Blueprint, current_app, redirect, render_template, request,
                    send_from_directory, session, url_for)
@@ -135,7 +136,7 @@ def settings():
     """Account settings page"""
 
     if not current_user.is_authenticated:
-        return render_template("404.html"), 404
+        return render_template("401.html"), 401
 
     class SettingsForm(FlaskForm):
         """Settings form class"""
@@ -178,6 +179,25 @@ def settings():
         "settings.html",
         form=form,
     )
+
+
+@main.get("/token")
+def manage_token():
+    """View for managing the user token"""
+
+    if not current_user.is_authenticated:
+        return render_template("401.html"), 401
+
+    if request.args.get("regenerate") == "true":
+        user = User.query.filter_by(id=current_user.id).first()
+        user.token = str(uuid4())
+
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect(url_for("main.manage_token"))
+
+    return render_template("manage-token.html")
 
 
 @main.get("/inbox")

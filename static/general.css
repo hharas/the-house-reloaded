@@ -115,15 +115,3 @@ p {
     color: red;
   }
 }
-
-.account-token-wrap {
-  font-weight: bold;
-}
-
-.account-token-wrap .account-token {
-  display: none;
-}
-
-.account-token-wrap:hover .account-token {
-  display: block;
-}

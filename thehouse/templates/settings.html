@@ -20,10 +20,10 @@ metatags %}
     <br />
     {{ form.submit }}
   </form>
+  <h3>
+    <a href="{{ url_for('main.manage_token') }}">Account Token Management</a>
+  </h3>
+  <p>Do not expose your account token to others!</p>
   <br />
-  <p class="account-token-wrap">
-    <b>(HOVER TO SEE ACCOUNT TOKEN)</b>
-    <span class="account-token">{{ current_user.token }}</span>
-  </p>
 </div>
 {% endblock %}
