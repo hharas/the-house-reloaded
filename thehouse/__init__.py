@@ -11,7 +11,7 @@ from .before_request_callbacks import logout_if_deleted, set_default_theme
 from .config import Config
 from .error_handlers import (handle_method_not_allowed, handle_page_not_found,
                              handle_server_error)
-from .extensions import bcrypt, db
+from .extensions import bcrypt, db, ma
 from .models import User
 from .routes import main
 from .user_callbacks import login_manager
@@ -40,6 +40,7 @@ def create_app(config_class=Config):  # pylint: disable=unused-argument
     login_manager.login_view = "login"
     db.init_app(app)
     bcrypt.init_app(app)
+    ma.init_app(app)
 
     register_blueprints(app)
 

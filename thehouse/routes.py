@@ -666,18 +666,19 @@ def view_thread(cat_title: str, thread_id: int):
 
     if category:
         if thread:
-            thread.views += 1
-            db.session.commit()
+            if thread.cat_id == category.id:
+                thread.views += 1
+                db.session.commit()
 
-            return render_template(
-                "view-thread.html",
-                form=form,
-                category=category,
-                thread=thread,
-                rendered_posts=rendered_posts,
-                User=User,
-                Post=Post
-            )
+                return render_template(
+                    "view-thread.html",
+                    form=form,
+                    category=category,
+                    thread=thread,
+                    rendered_posts=rendered_posts,
+                    User=User,
+                    Post=Post
+                )
 
     return render_template("404.html"), 404
 

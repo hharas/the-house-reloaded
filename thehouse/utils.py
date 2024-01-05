@@ -44,3 +44,12 @@ def delete_upload(filename: str):
             current_app.config["UPLOADS_DIRECTORY"], filename))
     except FileNotFoundError as error:
         eprint(error)
+
+
+def form_response(result="", error: str = "") -> dict:
+    """Function that forms an API response"""
+
+    return {
+        "result": result or None,
+        "error": error or None
+    }

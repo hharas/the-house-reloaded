@@ -5,7 +5,8 @@
 <div class="main">
   <h1>401</h1>
   <p>
-    <a href="{{ url_for('main.login') }}">Login</a> in order for this to work!
+    <a href="{{ url_for('main.login') + '?referer=' + request.path }}">Login</a>
+    in order for this to work!
   </p>
 </div>
 {% endblock %}
