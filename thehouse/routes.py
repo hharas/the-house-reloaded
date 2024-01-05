@@ -240,7 +240,7 @@ def inbox():
     return render_template("401.html"), 401
 
 
-@main.route("/~<username>/toggle-mod", methods=["GET", "POST"])
+@main.get("/~<username>/toggle-mod")
 def toggle_mod(username: str):
     """View for toggling moderation permissions of a user"""
     user = User.query.filter_by(username=username).first()
@@ -474,7 +474,7 @@ def view_user(username: str):
     return render_template("404.html"), 404
 
 
-@main.route("/<cat_title>/", strict_slashes=False)
+@main.get("/<cat_title>/", strict_slashes=False)
 def view_category(cat_title: str):
     """View for viewing a category"""
 
