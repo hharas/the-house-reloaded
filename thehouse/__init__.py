@@ -37,7 +37,6 @@ def create_app(config_class=Config):  # pylint: disable=unused-argument
         )
 
     login_manager.init_app(app)
-    login_manager.login_view = "login"
     db.init_app(app)
     bcrypt.init_app(app)
     ma.init_app(app)
