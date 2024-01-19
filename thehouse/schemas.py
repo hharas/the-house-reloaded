@@ -30,9 +30,45 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     @post_dump
     def add_picture_url(self, data, **kwargs):  # pylint: disable=unused-argument
         """Add a picture_url field replacing picture_filename"""
+
         data["picture_url"] = url_for(
             "main.uploads", filename=data["picture_filename"], _external=True)
         del data["picture_filename"]
+
+        return data
+
+    @post_dump
+    def add_recent_activities(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Add recent_activities field"""
+
+        activities = []
+
+        for thread in Thread.query.filter_by(creator=data["id"], deleted=False).all():
+            activities.append(
+                {"type": "thread_creation", "data": ThreadSchema().dump(thread)})
+
+        for post in Post.query.filter_by(author=data["id"], deleted=False).all():
+            activities.append(
+                {"type": "new_post", "data": PostSchema().dump(post)})
+
+        activities = sorted(
+            activities,
+            key=lambda activity: activity["data"]["creation_date"],
+            reverse=True
+        )
+
+        data["recent_activities"] = []
+
+        for activity in activities:
+            data["recent_activities"].append(
+                {
+                    "type": activity["type"],
+                    "id": activity["data"]["id"]
+                } if activity["type"] == "thread_creation" else {
+                    "type": activity["type"],
+                    "id": activity["data"]["id"]
+                }
+            )
 
         return data
 
@@ -41,16 +77,6 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
     """Schema for category model"""
     class Meta:  # pylint: disable=missing-class-docstring disable=too-few-public-methods
         model = Category
-
-    @post_dump
-    def exclude_fields(self, data, **kwargs):  # pylint: disable=unused-argument
-        """Exclude unnecessary fields to expose"""
-        fields_to_exclude = ["id"]
-
-        for field in fields_to_exclude:
-            data.pop(field, None)
-
-        return data
 
     @post_dump
     def add_threads(self, data, **kwargs):  # pylint: disable=unused-argument
@@ -75,11 +101,11 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
         for thread in Thread.query.filter_by(cat_id=data["id"], deleted=False):
             if not User.query.filter_by(id=thread.creator).first().deleted:
                 activities.append(
-                    {"type": "thread", "data": ThreadSchema().dump(thread)})
+                    {"type": "thread_creation", "data": ThreadSchema().dump(thread)})
         for post in Post.query.filter_by(cat_id=data["id"], deleted=False):
             if not User.query.filter_by(id=post.author).first().deleted:
                 activities.append(
-                    {"type": "post", "data": PostSchema().dump(post)})
+                    {"type": "new_post", "data": PostSchema().dump(post)})
 
         activities = sorted(
             activities,
@@ -90,14 +116,11 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
 
         data["last_activity"] = (
             {
-                "type": "thread_creation",
-                "user": last_activity["data"]["creator"],
-                "thread_id": last_activity["data"]["id"],
-            } if last_activity["type"] == "thread" else {
-                "type": "new_post",
-                "user": last_activity["data"]["author"],
-                "thread_id": last_activity["data"]["thread_id"],
-                "post_id": last_activity["data"]["id"],
+                "type": last_activity["type"],
+                "id": last_activity["data"]["id"],
+            } if last_activity["type"] == "thread_creation" else {
+                "type": last_activity["type"],
+                "id": last_activity["data"]["id"],
             }
         ) if last_activity else None
 
@@ -108,15 +131,6 @@ class ThreadSchema(ma.SQLAlchemyAutoSchema):
     """Schema for thread model"""
     class Meta:  # pylint: disable=missing-class-docstring disable=too-few-public-methods
         model = Thread
-
-    @post_dump
-    def replace_cat_id(self, data, **kwargs):  # pylint: disable=unused-argument
-        """Replace cat_id field with cat_title"""
-
-        data["cat_title"] = Category.query.get(data["cat_id"]).title
-        del data["cat_id"]
-
-        return data
 
     @post_dump
     def replace_creator(self, data, **kwargs):  # pylint: disable=unused-argument
@@ -158,15 +172,6 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:  # pylint: disable=missing-class-docstring disable=too-few-public-methods
         model = Post
-
-    @post_dump
-    def replace_cat_id(self, data, **kwargs):  # pylint: disable=unused-argument
-        """Replace cat_id field with cat_title"""
-
-        data["cat_title"] = Category.query.get(data["cat_id"]).title
-        del data["cat_id"]
-
-        return data
 
     @post_dump
     def replace_author(self, data, **kwargs):  # pylint: disable=unused-argument

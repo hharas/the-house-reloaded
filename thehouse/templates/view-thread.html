@@ -20,7 +20,7 @@ or current_user.id == thread.creator) %}
   >delete thread</a
 >
 | {% endif %}
-<a href="{{ url_for('main.view_category', cat_title=category.title) }}/new"
+<a href="{{ url_for('main.create_thread', cat_title=category.title) }}"
   >create thread</a
 >
 | {% endif %} {% endblock %} {% block main %}

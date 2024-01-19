@@ -13,7 +13,30 @@ from .utils import form_response
 api = Blueprint("api", __name__, url_prefix="/api")
 
 
-@api.get("/")
+@api.get('/')
+def index():
+    """API status message"""
+
+    return "It's working!"
+
+
+@api.get("/users/<username>/", strict_slashes=False)
+def get_user(username: str):
+    """Get a specific user by its id"""
+
+    user_schema = UserSchema()
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or user.deleted:
+        return form_response(error="User not found"), 404
+
+    result = user_schema.dump(user)
+
+    return form_response(result)
+
+
+@api.get("/categories/", strict_slashes=False)
 def get_categories():
     """Get all categories"""
 
@@ -25,13 +48,13 @@ def get_categories():
     return form_response(result)
 
 
-@api.get("/<cat_title>/", strict_slashes=False)
-def get_category(cat_title: str):
+@api.get("/categories/<int:cat_id>/", strict_slashes=False)
+def get_category(cat_id: int):
     """Get a specific category by its id"""
 
     category_schema = CategorySchema()
 
-    category = Category.query.filter_by(title=cat_title).first()
+    category = Category.query.get(cat_id)
 
     if not category:
         return form_response(error="Category not found"), 404
@@ -41,14 +64,27 @@ def get_category(cat_title: str):
     return form_response(result)
 
 
-@api.get("/<cat_title>/<int:thread_id>/", strict_slashes=False)
-def get_thread(cat_title: str, thread_id: int):
+@api.get("/threads/", strict_slashes=False)
+def get_threads():
+    """Get all threads"""
+
+    threads_schema = ThreadSchema(many=True)
+
+    threads = Thread.query.filter_by(deleted=False).all()
+    result = threads_schema.dump(threads)
+
+    result.reverse()
+
+    return form_response(result)
+
+
+@api.get("/threads/<int:thread_id>/", strict_slashes=False)
+def get_thread(thread_id: int):
     """Get a specific thread by its id"""
 
     thread_schema = ThreadSchema()
 
-    category = Category.query.filter_by(title=cat_title).first()
-    thread = Thread.query.filter_by(id=thread_id, cat_id=category.id).first()
+    thread = Thread.query.get(thread_id)
 
     if not thread:
         return form_response(error="Thread not found"), 404
@@ -61,36 +97,31 @@ def get_thread(cat_title: str, thread_id: int):
     return form_response(result)
 
 
-@api.get("/<cat_title>/<int:thread_id>/<int:post_id>/", strict_slashes=False)
-def get_post(cat_title: str, thread_id: int, post_id: int):
+@api.get("/posts/", strict_slashes=False)
+def get_posts():
+    """Get all posts"""
+
+    posts_schema = PostSchema(many=True)
+
+    posts = Post.query.filter_by(deleted=False).all()
+    result = posts_schema.dump(posts)
+
+    result.reverse()
+
+    return form_response(result)
+
+
+@api.get("/posts/<int:post_id>/", strict_slashes=False)
+def get_post(post_id: int):
     """Get a specific post by its id"""
 
     post_schema = PostSchema()
 
-    category = Category.query.filter_by(title=cat_title).first()
-    thread = Thread.query.filter_by(id=thread_id, cat_id=category.id).first()
-    post = Post.query.filter_by(
-        id=post_id, cat_id=category.id, thread_id=thread.id).first()
+    post = Post.query.get(post_id)
 
     if not post:
         return form_response(error="Post not found"), 404
 
     result = post_schema.dump(post)
-
-    return form_response(result)
-
-
-@api.get("/~<username>/", strict_slashes=False)
-def get_user(username: str):
-    """Get a specific user by its id"""
-
-    user_schema = UserSchema()
-
-    user = User.query.filter_by(username=username).first()
-
-    if not user or user.deleted:
-        return form_response(error="User not found"), 404
-
-    result = user_schema.dump(user)
 
     return form_response(result)

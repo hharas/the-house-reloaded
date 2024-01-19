@@ -9,8 +9,10 @@ from flask import Flask
 from .api_routes import api
 from .before_request_callbacks import logout_if_deleted, set_default_theme
 from .config import Config
-from .error_handlers import (handle_method_not_allowed, handle_page_not_found,
-                             handle_server_error)
+from .error_handlers import (api_handle_method_not_allowed,
+                             api_handle_server_error, handle_page_not_found,
+                             main_handle_method_not_allowed,
+                             main_handle_server_error)
 from .extensions import bcrypt, db, ma
 from .models import User
 from .routes import main
@@ -20,6 +22,14 @@ from .utils import render_content
 
 def register_blueprints(app):
     """Register blueprints to app"""
+    main.errorhandler(405)(main_handle_method_not_allowed)
+    main.errorhandler(500)(main_handle_server_error)
+
+    main.before_request(set_default_theme)
+
+    api.errorhandler(405)(api_handle_method_not_allowed)
+    api.errorhandler(500)(api_handle_server_error)
+
     app.register_blueprint(main)
     app.register_blueprint(api)
 
@@ -42,13 +52,8 @@ def create_app(config_class=Config):  # pylint: disable=unused-argument
     ma.init_app(app)
 
     register_blueprints(app)
-
-    app.before_request(set_default_theme)
-    app.before_request(logout_if_deleted)
-
     app.errorhandler(404)(handle_page_not_found)
-    app.errorhandler(405)(handle_method_not_allowed)
-    app.errorhandler(500)(handle_server_error)
+    app.before_request(logout_if_deleted)
 
     app.jinja_env.filters['render_content'] = render_content
 

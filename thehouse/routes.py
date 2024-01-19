@@ -88,7 +88,7 @@ def login():
                 register_form.password.data
             ).decode("utf-8")
 
-        elif db.engine.dialect.name == "sqlite":
+        else:
             hashed_password = bcrypt.generate_password_hash(
                 register_form.password.data
             )
@@ -449,13 +449,11 @@ def view_user(username: str):
         if not user.deleted:
             activities = []
 
-            for thread in Thread.query.filter_by(creator=user.id).all():
-                if not thread.deleted:
-                    activities.append({"type": "thread", "data": thread})
+            for thread in Thread.query.filter_by(creator=user.id, deleted=False).all():
+                activities.append({"type": "thread", "data": thread})
 
-            for post in Post.query.filter_by(author=user.id).all():
-                if not post.deleted:
-                    activities.append({"type": "post", "data": post})
+            for post in Post.query.filter_by(author=user.id, deleted=False).all():
+                activities.append({"type": "post", "data": post})
 
             activities = sorted(
                 activities,
