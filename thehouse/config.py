@@ -22,3 +22,4 @@ class Config:  # pylint: disable=too-few-public-methods
     PREVIEWABLE_EXTENSIONS = ["png", "jpeg", "jpg", "webp", "gif",
                               "mp4", "webm", "mp3", "ogg", "wav",
                               "flac", "alac", "m4a", "aac", "svg"]
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10mb
