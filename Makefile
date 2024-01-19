@@ -1,6 +1,6 @@
 VENV = venv
 PYTHON = $(VENV)/bin/python3
-PIP = $(VENV)/bin/pip3
+PIP = $(VENV)/bin/python3 -m pip
 FLASK = $(VENV)/bin/flask
 GUNICORN = $(VENV)/bin/gunicorn
 
