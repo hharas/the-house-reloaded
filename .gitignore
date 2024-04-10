@@ -4,3 +4,4 @@ instance/
 uploads/
 
 .env
+debug.rest

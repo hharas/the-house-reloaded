@@ -24,7 +24,7 @@ from .utils import (delete_upload, generate_uploads_filename, render_content,
 main = Blueprint("main", __name__)
 
 
-@main.get('/')
+@main.get('/')  # Synced
 def index():
     """Homepage"""
 
@@ -57,7 +57,7 @@ def index():
     )
 
 
-@main.get("/toggle-theme")
+@main.get("/toggle-theme")  # Synced
 def toggle_theme():
     """Endpoint for theme toggling"""
 
@@ -67,7 +67,7 @@ def toggle_theme():
         else redirect(url_for("main.index"))
 
 
-@main.route("/login", methods=["GET", "POST"])
+@main.route("/login", methods=["GET", "POST"])  # Synced
 def login():
     """Login page"""
 
@@ -113,7 +113,7 @@ def login():
     )
 
 
-@main.get("/promote")
+@main.get("/promote")  # Synced
 def promote():
     """Endpoint that promotes a user to admin if he has an admin key"""
     if current_user.is_authenticated:

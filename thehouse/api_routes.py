@@ -3,7 +3,7 @@ The House reloaded
 Routes
 """
 
-from flask import Blueprint
+from flask import Blueprint, current_app, request
 
 from .extensions import db
 from .models import Category, Post, Thread, User
@@ -11,6 +11,19 @@ from .schemas import CategorySchema, PostSchema, ThreadSchema, UserSchema
 from .utils import form_response
 
 api = Blueprint("api", __name__, url_prefix="/api")
+
+
+def authorize(payload):
+    """Authorize an API User"""
+
+    user = User.query.filter_by(
+        token=payload.headers.get("Authorization")
+    ).first()
+
+    if user is not None:
+        return user
+
+    return None
 
 
 @api.get('/')
@@ -125,3 +138,38 @@ def get_post(post_id: int):
     result = post_schema.dump(post)
 
     return form_response(result)
+
+
+@api.post("/promote/", strict_slashes=False)
+def promote():
+    """Promote a user to admin"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        if current_app.config["ENABLE_ADMIN_KEY"]:
+            if current_app.config["ADMIN_KEY"] is not None:
+                if request.get_json().get("key") == current_app.config["ADMIN_KEY"]:
+                    user = User.query.filter_by(id=current_user.id).first()
+                    user.role = "admin"
+
+                    db.session.add(user)
+                    db.session.commit()
+
+                    return form_response("Promoted Successfully!")
+
+                    # TODO: What would it say if one's already promoted?
+
+    return form_response(error="Not found"), 404
+
+
+@api.get("/whoami/", strict_slashes=False)
+def whoami():
+    """Confirm a user's login"""
+
+    user = authorize(request)
+
+    if user is not None:
+        return form_response(user.username)
+
+    return form_response(None)
