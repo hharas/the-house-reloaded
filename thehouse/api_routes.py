@@ -147,18 +147,17 @@ def promote():
     current_user = authorize(request)
 
     if current_user is not None:
-        if current_app.config["ENABLE_ADMIN_KEY"]:
-            if current_app.config["ADMIN_KEY"] is not None:
-                if request.get_json().get("key") == current_app.config["ADMIN_KEY"]:
-                    user = User.query.filter_by(id=current_user.id).first()
-                    user.role = "admin"
+        if current_user.role != "admin":
+            if current_app.config["ENABLE_ADMIN_KEY"]:
+                if current_app.config["ADMIN_KEY"] is not None:
+                    if request.get_json().get("key") == current_app.config["ADMIN_KEY"]:
+                        user = User.query.filter_by(id=current_user.id).first()
+                        user.role = "admin"
 
-                    db.session.add(user)
-                    db.session.commit()
+                        db.session.add(user)
+                        db.session.commit()
 
-                    return form_response("Promoted Successfully!")
-
-                    # TODO: What would it say if one's already promoted?
+                        return form_response("Promoted Successfully!")
 
     return form_response(error="Not found"), 404
 
