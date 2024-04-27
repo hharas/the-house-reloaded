@@ -24,7 +24,7 @@ from .utils import (delete_upload, generate_uploads_filename, render_content,
 main = Blueprint("main", __name__)
 
 
-@main.get('/')  # Synced
+@main.get('/')
 def index():
     """Homepage"""
 
@@ -57,7 +57,7 @@ def index():
     )
 
 
-@main.get("/toggle-theme")  # Synced
+@main.get("/toggle-theme")
 def toggle_theme():
     """Endpoint for theme toggling"""
 
@@ -67,7 +67,7 @@ def toggle_theme():
         else redirect(url_for("main.index"))
 
 
-@main.route("/login", methods=["GET", "POST"])  # Synced
+@main.route("/login", methods=["GET", "POST"])
 def login():
     """Login page"""
 
@@ -113,7 +113,7 @@ def login():
     )
 
 
-@main.get("/promote")  # Synced
+@main.get("/promote")
 def promote():
     """Endpoint that promotes a user to admin if he has an admin key"""
     if current_user.is_authenticated:
@@ -131,7 +131,7 @@ def promote():
     return render_template("404.html"), 404
 
 
-@main.route("/settings", methods=["GET", "POST"])
+@main.route("/settings", methods=["GET", "POST"])  # TODO: Make API endpoint
 def settings():
     """Account settings page"""
 
@@ -200,7 +200,7 @@ def manage_token():
     return render_template("manage-token.html")
 
 
-@main.get("/inbox")
+@main.get("/inbox")  # TODO: Make API endpoint
 def inbox():
     """View for displaying the users inbox"""
     if current_user.is_authenticated:
@@ -240,7 +240,7 @@ def inbox():
     return render_template("401.html"), 401
 
 
-@main.get("/~<username>/toggle-mod")
+@main.get("/~<username>/toggle-mod")  # TODO: Make API endpoint
 def toggle_mod(username: str):
     """View for toggling moderation permissions of a user"""
     user = User.query.filter_by(username=username).first()
@@ -278,7 +278,7 @@ def logout():
         else redirect(url_for("main.index"))
 
 
-@main.route("/new", methods=["GET", "POST"])
+@main.route("/new", methods=["GET", "POST"])  # TODO: Make API endpoint
 def create_category():
     """Create category page"""
 
@@ -301,6 +301,7 @@ def create_category():
     return render_template("401.html"), 401
 
 
+# TODO: Make API endpoint
 @main.route("/<cat_title>/new", methods=["GET", "POST"])
 def create_thread(cat_title: str):
     """Create thread page"""
@@ -357,6 +358,7 @@ def create_thread(cat_title: str):
     return render_template("401.html"), 401
 
 
+# TODO: Make API endpoint
 @main.route("/<cat_title>/<int:thread_id>/new", methods=["GET", "POST"])
 def create_post(cat_title: str, thread_id: int):
     """View for posting a comment inside a thread"""
@@ -681,7 +683,7 @@ def view_thread(cat_title: str, thread_id: int):
     return render_template("404.html"), 404
 
 
-@main.get("/~<username>/delete")
+@main.get("/~<username>/delete")  # TODO: Make API endpoint
 def delete_user(username: str):
     """View for deleting a user"""
 
@@ -726,7 +728,7 @@ def delete_user(username: str):
     return render_template("404.html"), 404
 
 
-@main.get("/<cat_title>/delete")
+@main.get("/<cat_title>/delete")  # TODO: Make API endpoint
 def delete_category(cat_title: str):
     """View for deleting a category"""
 
@@ -767,7 +769,7 @@ def delete_category(cat_title: str):
     return render_template("404.html"), 404
 
 
-@main.get("/<cat_title>/<int:thread_id>/delete")
+@main.get("/<cat_title>/<int:thread_id>/delete")  # TODO: Make API endpoint
 def delete_thread(cat_title: str, thread_id: int):
     """View for deleting a thread"""
 
@@ -810,6 +812,7 @@ def delete_thread(cat_title: str, thread_id: int):
     return render_template("404.html"), 404
 
 
+# TODO: Make API endpoint
 @main.get("/<cat_title>/<int:thread_id>/<int:post_id>/delete")
 def delete_post(cat_title: str, thread_id: int, post_id: int):
     """View for deleting a post"""
