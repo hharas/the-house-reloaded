@@ -185,27 +185,25 @@ def settings():
         if request.method == "POST":
             altered = False
 
-            if request.content_type == "application/json":
-                if request.json["bio"]:
-                    current_user.bio = request.json["bio"].strip()
-                    altered = True
+            if "bio" in request.form:
+                current_user.bio = request.form["bio"].strip()
+                altered = True
 
-            if request.content_type.startswith("multipart/form-data"):
-                if request.files["picture"]:
-                    picture = request.files["picture"]
+            if "picture" in request.files:
+                picture = request.files["picture"]
 
-                    if current_user.picture_filename:
-                        delete_upload(current_user.picture_filename)
+                if current_user.picture_filename:
+                    delete_upload(current_user.picture_filename)
 
-                    profile_picture_filename = generate_uploads_filename(
-                        picture)
+                profile_picture_filename = generate_uploads_filename(
+                    picture)
 
-                    current_user.picture_filename = profile_picture_filename
+                current_user.picture_filename = profile_picture_filename
 
-                    if len(current_user.picture_filename) > 0:
-                        save_to_uploads(picture, current_user.picture_filename)
+                if len(current_user.picture_filename) > 0:
+                    save_to_uploads(picture, current_user.picture_filename)
 
-                    altered = True
+                altered = True
 
             if altered:
                 db.session.add(current_user)
