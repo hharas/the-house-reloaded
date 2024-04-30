@@ -3,12 +3,13 @@ The House reloaded
 Routes
 """
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, request, url_for
 
 from .extensions import db
 from .models import Category, Post, Thread, User
 from .schemas import CategorySchema, PostSchema, ThreadSchema, UserSchema
-from .utils import form_response
+from .utils import (delete_upload, form_response, generate_uploads_filename,
+                    save_to_uploads)
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -160,6 +161,63 @@ def promote():
                         return form_response("Promoted Successfully!")
 
     return form_response(error="Not found"), 404
+
+
+@api.route("/settings/", methods=["GET", "POST"], strict_slashes=False)
+def settings():
+    """Display user's bio and profile picture url"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        if request.method == "GET":
+            return form_response(
+                {
+                    "bio": current_user.bio,
+                    "picture_url": url_for(
+                        "main.uploads",
+                        filename=current_user.picture_filename,
+                        _external=True
+                    )
+                }
+            )
+
+        if request.method == "POST":
+            altered = False
+
+            if request.content_type == "application/json":
+                if request.json["bio"]:
+                    current_user.bio = request.json["bio"].strip()
+                    altered = True
+
+            if request.content_type.startswith("multipart/form-data"):
+                if request.files["picture"]:
+                    picture = request.files["picture"]
+
+                    if current_user.picture_filename:
+                        delete_upload(current_user.picture_filename)
+
+                    profile_picture_filename = generate_uploads_filename(
+                        picture)
+
+                    current_user.picture_filename = profile_picture_filename
+
+                    if len(current_user.picture_filename) > 0:
+                        save_to_uploads(picture, current_user.picture_filename)
+
+                    altered = True
+
+            if altered:
+                db.session.add(current_user)
+                db.session.commit()
+
+                return form_response(result="Changes committed successfully!")
+
+            return form_response(result="No changes were made")
+
+        return form_response(error="Method not allowed"), 405
+
+    return form_response(error="Unauthorised"), 401
 
 
 @api.get("/whoami/", strict_slashes=False)

@@ -131,7 +131,7 @@ def promote():
     return render_template("404.html"), 404
 
 
-@main.route("/settings", methods=["GET", "POST"])  # TODO: Make API endpoint
+@main.route("/settings", methods=["GET", "POST"])
 def settings():
     """Account settings page"""
 
@@ -526,11 +526,14 @@ def view_thread(cat_title: str, thread_id: int):
                 "main.view_user", username=author.username)
 
             if author.role == "user":
-                author_rendered_role = f"""<span style="color: lightgreen;">{author.role}</span>"""
+                author_rendered_role = f"""<span style="color: lightgreen;">{
+                    author.role}</span>"""
             elif author.role == "moderator":
-                author_rendered_role = f"""<span style="color: yellow;">{author.role}</span>"""
+                author_rendered_role = f"""<span style="color: yellow;">{
+                    author.role}</span>"""
             else:
-                author_rendered_role = f"""<span style="color: red;">{author.role}</span>"""
+                author_rendered_role = f"""<span style="color: red;">{
+                    author.role}</span>"""
 
             picture_url = url_for(
                 "main.uploads",
@@ -605,8 +608,8 @@ def view_thread(cat_title: str, thread_id: int):
 
                     if post.attachment_filename and not post.deleted:
                         html += f"""<p class="comment-tr">
-                        <a href="{url_for("main.uploads", filename=post.attachment_filename) + "?download=true"}">[save]</a>
-                        </p>"""
+                        <a href="{url_for("main.uploads", filename=post.attachment_filename) +
+                                  "?download=true"}">[save]</a></p>"""
 
                     if not post.deleted and (current_user.role == "admin" or
                                              (
@@ -615,12 +618,22 @@ def view_thread(cat_title: str, thread_id: int):
                                              ) or
                                              current_user.id == post.author):
                         html += f"""<p class="comment-tr">
-                                    <a href="{url_for('main.delete_post', cat_title=category.title, thread_id=post.thread_id, post_id=post.id)}">[delete]</a>
-                                </p>"""
+                                    <a href="{
+                            url_for(
+                                'main.delete_post',
+                                cat_title=category.title,
+                                thread_id=post.thread_id,
+                                post_id=post.id
+                            )
+                        }">[delete]</a></p>"""
 
                 elif post.attachment_filename and not post.deleted:
                     html += f"""<p class="comment-tr">
-                    <a href="{url_for("main.uploads", filename=post.attachment_filename) + "?download=true"}">[save]</a>
+                    <a href="{
+                        url_for(
+                            "main.uploads",
+                            filename=post.attachment_filename
+                        ) + "?download=true"}">[save]</a>
                     </p>"""
 
                 html += "</div>"
@@ -631,7 +644,8 @@ def view_thread(cat_title: str, thread_id: int):
                     </div>"""
 
                 if post.content:
-                    html += f"""<div class="comment-content">{render_content(post.content)}</div>"""
+                    html += f"""<div class="comment-content">{
+                        render_content(post.content)}</div>"""
 
                 if post.attachment_filename and not post.deleted:
                     attachment_url = url_for(
