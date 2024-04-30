@@ -18,8 +18,8 @@ from .extensions import bcrypt, db
 from .forms import (CreateCategoryForm, CreatePostForm, CreateThreadForm,
                     LoginForm, RegisterForm)
 from .models import Category, Post, Thread, User
-from .utils import (delete_upload, generate_uploads_filename, render_content,
-                    save_to_uploads)
+from .utils import (delete_upload, generate_uploads_filename, get_inbox,
+                    render_content, save_to_uploads)
 
 main = Blueprint("main", __name__)
 
@@ -200,40 +200,35 @@ def manage_token():
     return render_template("manage-token.html")
 
 
-@main.get("/inbox")  # TODO: Make API endpoint
+@main.get("/inbox")
 def inbox():
     """View for displaying the users inbox"""
     if current_user.is_authenticated:
-        user_post_ids = []
         inbox_messages = []
 
-        for user_post in Post.query.filter_by(author=current_user.id, deleted=False).all():
-            user_post_ids.append(user_post.id)
+        for post in get_inbox(current_user, Post):
+            original_post = Post.query.filter_by(
+                id=post.replying_to).first()
 
-        for post in Post.query.filter_by(deleted=False).all():
-            if post.author != current_user.id:
-                if post.replying_to:
-                    if post.replying_to in user_post_ids:
-                        original_post = Post.query.filter_by(
-                            id=post.replying_to).first()
+            message = {
+                "category":
+                Category.query.filter_by(id=post.cat_id).first(),
+                "thread":
+                Thread.query.filter_by(id=post.thread_id).first(),
+                "original_post":
+                original_post,
+                "original_author":
+                User.query.filter_by(
+                    id=original_post.author).first(),
+                "post":
+                post,
+                "author":
+                User.query.filter_by(id=post.author).first(),
+            }
 
-                        message = {
-                            "category":
-                            Category.query.filter_by(id=post.cat_id).first(),
-                            "thread":
-                            Thread.query.filter_by(id=post.thread_id).first(),
-                            "original_post":
-                            original_post,
-                            "original_author":
-                            User.query.filter_by(
-                                id=original_post.author).first(),
-                            "post":
-                            post,
-                            "author":
-                            User.query.filter_by(id=post.author).first(),
-                        }
+            inbox_messages.append(message)
 
-                        inbox_messages.append(message)
+        inbox_messages.reverse()
 
         return render_template("inbox.html", inbox=inbox_messages)
 

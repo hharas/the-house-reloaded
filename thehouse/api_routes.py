@@ -9,7 +9,7 @@ from .extensions import db
 from .models import Category, Post, Thread, User
 from .schemas import CategorySchema, PostSchema, ThreadSchema, UserSchema
 from .utils import (delete_upload, form_response, generate_uploads_filename,
-                    save_to_uploads)
+                    get_inbox, save_to_uploads)
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -218,6 +218,27 @@ def settings():
         return form_response(error="Method not allowed"), 405
 
     return form_response(error="Unauthorised"), 401
+
+
+@api.get("/inbox/", strict_slashes=False)
+def inbox():
+    """Retrieve the user's reply inbox"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        post_schema = PostSchema()
+
+        inbox_posts = []
+
+        for post in get_inbox(current_user, Post):
+            inbox_posts.append(post_schema.dump(post))
+
+        inbox_posts.reverse()  # Show more recent posts first
+
+        return form_response(inbox_posts)
+
+    return form_response("Unauthorised"), 401
 
 
 @api.get("/whoami/", strict_slashes=False)

@@ -46,6 +46,21 @@ def delete_upload(filename: str):
         eprint(error)
 
 
+def get_inbox(current_user, db_post):
+    """yield posts in the user's inbox"""
+
+    user_post_ids = []
+
+    for user_post in db_post.query.filter_by(author=current_user.id, deleted=False).all():
+        user_post_ids.append(user_post.id)
+
+    for post in db_post.query.filter_by(deleted=False).all():
+        if post.author != current_user.id:
+            if post.replying_to:
+                if post.replying_to in user_post_ids:
+                    yield post
+
+
 def form_response(result="", error: str = "") -> dict:
     """Function that forms an API response"""
 
