@@ -31,8 +31,15 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     def add_picture_url(self, data, **kwargs):  # pylint: disable=unused-argument
         """Add a picture_url field replacing picture_filename"""
 
-        data["picture_url"] = url_for(
-            "main.uploads", filename=data["picture_filename"], _external=True)
+        if data["picture_filename"]:
+            data["picture_url"] = url_for(
+                "main.uploads",
+                filename=data["picture_filename"],
+                _external=True
+            )
+        else:
+            data["picture_url"] = None
+
         del data["picture_filename"]
 
         return data
