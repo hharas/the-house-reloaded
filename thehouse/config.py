@@ -19,7 +19,4 @@ class Config:  # pylint: disable=too-few-public-methods
     UPLOADS_DIRECTORY = os.getenv("THR_UPLOADS_DIRECTORY") or "uploads"
     ENABLE_ADMIN_KEY = os.getenv("THR_ENABLE_ADMIN_KEY") == "yes"
     ADMIN_KEY = None if not ENABLE_ADMIN_KEY else os.getenv("THR_ADMIN_KEY")
-    PREVIEWABLE_EXTENSIONS = ["png", "jpeg", "jpg", "webp", "gif",
-                              "mp4", "webm", "mp3", "ogg", "wav",
-                              "flac", "alac", "m4a", "aac", "svg"]
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10mb

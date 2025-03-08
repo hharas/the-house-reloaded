@@ -107,18 +107,8 @@ current_user.id == user.id %}
     <div class="comment-content" style="font-style: italic">[deleted]</div>
     {% endif %} {% if post.content %}
     <div class="comment-content">{{ post.content|render_content|safe }}</div>
-    {% endif %} {% if post.attachment_filename %} {% if
-    post.attachment_filename.split(".")|last in config["PREVIEWABLE_EXTENSIONS"]
-    %}
-    <embed
-      src="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
-      style="max-height: 300px; margin-top: 5px"
-    />
-    {% else %}
-    <a href="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
-      >{{ post.attachment_filename }}</a
-    >
-    {% endif %} {% endif %}
+    {% endif %} {% if post.attachment_filename %} {{
+    embed_file(post.attachment_filename)|safe }} {% endif %}
   </div>
   <hr />
   {% endif %} {% else %} {% set thread = activity.data %} {% set category =
@@ -138,18 +128,8 @@ current_user.id == user.id %}
     >
   </h4>
   <p>{{ thread.content|render_content|safe|truncate(200) }}</p>
-  {% if thread.attachment_filename %} {% if
-  thread.attachment_filename.split(".")|last in config["PREVIEWABLE_EXTENSIONS"]
-  %}
-  <embed
-    src="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
-    style="max-height: 100px; margin-top: 5px"
-  />
-  {% else %}
-  <a href="{{ url_for('main.uploads', filename=thread.attachment_filename) }}"
-    >{{ thread.attachment_filename }}</a
-  >
-  {% endif %} {% endif %}
+  {% if thread.attachment_filename %} {{
+  embed_file(thread.attachment_filename)|safe }} {% endif %}
   <hr />
   {% endif %} {% endif %} {% endfor %} {% endif %}
 </div>

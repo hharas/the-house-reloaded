@@ -18,8 +18,9 @@ from .extensions import bcrypt, db
 from .forms import (CreateCategoryForm, CreatePostForm, CreateThreadForm,
                     LoginForm, RegisterForm)
 from .models import Category, Post, Thread, User
-from .utils import (delete_upload, generate_uploads_filename, get_inbox,
-                    render_content, save_to_uploads)
+from .utils import (delete_upload, generate_file_embed,
+                    generate_uploads_filename, get_inbox, render_content,
+                    save_to_uploads)
 
 main = Blueprint("main", __name__)
 
@@ -643,19 +644,7 @@ def view_thread(cat_title: str, thread_id: int):
                         render_content(post.content)}</div>"""
 
                 if post.attachment_filename and not post.deleted:
-                    attachment_url = url_for(
-                        'main.uploads', filename=post.attachment_filename)
-                    if post.attachment_filename.split('.')[-1] in \
-                            current_app.config["PREVIEWABLE_EXTENSIONS"]:
-                        html += f"""<embed
-                            src="{attachment_url}"
-                            style="max-height: 300px; margin-top: 5px"
-                            />"""
-                    else:
-                        html += f"""
-                        <a href="{attachment_url}"
-                            >{post.attachment_filename}</a
-                            >"""
+                    html += generate_file_embed(post.attachment_filename)
 
                 child_html = build_tree(posts, post.id)
                 if child_html.strip():

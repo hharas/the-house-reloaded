@@ -62,19 +62,8 @@
     <div class="comment-content">
       {{ original_post.content|render_content|safe }}
     </div>
-    {% endif %} {% if original_post.attachment_filename %} {% if
-    original_post.attachment_filename.split(".")|last in
-    config["PREVIEWABLE_EXTENSIONS"] %}
-    <embed
-      src="{{ url_for('main.uploads', filename=original_post.attachment_filename) }}"
-      style="max-height: 300px; margin-top: 5px"
-    />
-    {% else %}
-    <a
-      href="{{ url_for('main.uploads', filename=original_post.attachment_filename) }}"
-      >{{ original_post.attachment_filename }}</a
-    >
-    {% endif %} {% endif %}
+    {% endif %} {% if original_post.attachment_filename %} {{
+    embed_file(original_post.attachment_filename)|safe }} {% endif %}
     <div class="comment-children">
       <div id="{{ post.id }}" class="comment" style="margin-top: 10px">
         <div class="top-comment">
@@ -113,19 +102,8 @@
         <div class="comment-content">
           {{ post.content|render_content|safe }}
         </div>
-        {% endif %} {% if post.attachment_filename %} {% if
-        post.attachment_filename.split(".")|last in
-        config["PREVIEWABLE_EXTENSIONS"] %}
-        <embed
-          src="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
-          style="max-height: 300px; margin-top: 5px"
-        />
-        {% else %}
-        <a
-          href="{{ url_for('main.uploads', filename=post.attachment_filename) }}"
-          >{{ post.attachment_filename }}</a
-        >
-        {% endif %} {% endif %}
+        {% endif %} {% if post.attachment_filename %} {{
+        embed_file(post.attachment_filename)|safe }} {% endif %}
       </div>
     </div>
   </div>

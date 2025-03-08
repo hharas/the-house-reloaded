@@ -14,10 +14,9 @@ from .error_handlers import (api_handle_method_not_allowed,
                              main_handle_method_not_allowed,
                              main_handle_server_error)
 from .extensions import bcrypt, db, ma
-from .models import User
 from .routes import main
 from .user_callbacks import login_manager
-from .utils import render_content
+from .utils import generate_file_embed, render_content
 
 
 def register_blueprints(app):
@@ -56,5 +55,6 @@ def create_app(config_class=Config):  # pylint: disable=unused-argument
     app.before_request(logout_if_deleted)
 
     app.jinja_env.filters['render_content'] = render_content
+    app.jinja_env.globals.update(embed_file=generate_file_embed)
 
     return app, db

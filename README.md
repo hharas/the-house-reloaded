@@ -2,7 +2,7 @@
 
 A python rewrite in flask of the original [The House](https://github.com/hharas/the-house) board that was written in PHP.
 
-The House is an old-school social board in which users can participate in posting threads, commenting on threads and interact with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a RESTful API that can be used to make alternative clients. THR's web interface does not use any javascript.
+The House is an old-school social board in which users can participate in posting threads, commenting on threads and interacting with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a RESTful API that can be used to make alternative clients. THR's web interface does not use any javascript.
 
 Source code is hosted on [SourceHut](https://git.sr.ht/~haras/the-house-reloaded) with [Documentation](https://man.sr.ht/~haras/thr-api-docs/) on how to use its API.
 
