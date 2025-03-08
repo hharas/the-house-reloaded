@@ -80,28 +80,23 @@ def generate_file_embed(filename: str, maxheight: int = 300) -> str:
     video_extensions = ["mp4", "webm", "mov", "avi"]
     audio_extensions = ["flac", "mp3", "ogg", "opus", "m4a"]
 
-    # Pick an HTML element
-
     if extension in image_extensions:
-        result += "<img"
-    elif extension in video_extensions:
-        result += "<video"
-    elif extension in audio_extensions:
-        result += "<audio controls>"
-    else:
-        # Straight up return
-        return f'<a href="{url_for('main.uploads', filename=filename)}">{filename}</a>'
-
-    # Add HTML
-
-    if extension in (image_extensions or video_extensions):
-        result += f"""
-        src="{url_for('main.uploads', filename=filename)}"
+        result += f"""<img
+        src="{url_for("main.uploads", filename=filename)}"
         style="max-height: {maxheight}px; margin-top: 5px"
         />"""
+    elif extension in video_extensions:
+        result += f"""<video height={maxheight} style='margin-top: 5px' controls>
+        <source src="{url_for("main.uploads", filename=filename)}">
+        Error: Your browser does not support the audio element.
+        </video>"""
     elif extension in audio_extensions:
-        result += f"""<source src="{url_for('main.uploads', filename=filename)}">
+        result += f"""<audio controls>
+        <source src="{url_for("main.uploads", filename=filename)}">
         Error: Your browser does not support the audio element.
         </audio>"""
+    else:
+        # Straight up return
+        return f'<a href="{url_for("main.uploads", filename=filename)}">{filename}</a>'
 
     return result
