@@ -73,6 +73,7 @@ class Thread(db.Model):  # pylint: disable=too-few-public-methods
 
         if self.attachment_filename:
             delete_upload(self.attachment_filename)
+            self.attachment_filename = None
 
 
 class Post(db.Model):  # pylint: disable=too-few-public-methods
@@ -95,3 +96,4 @@ class Post(db.Model):  # pylint: disable=too-few-public-methods
 
         if self.attachment_filename:
             delete_upload(self.attachment_filename)
+            self.attachment_filename = None
