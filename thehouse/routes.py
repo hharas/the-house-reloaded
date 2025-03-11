@@ -297,7 +297,6 @@ def create_category():
     return render_template("401.html"), 401
 
 
-# TODO: Make API endpoint
 @main.route("/<cat_title>/new", methods=["GET", "POST"])
 def create_thread(cat_title: str):
     """Create thread page"""

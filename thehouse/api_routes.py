@@ -105,8 +105,7 @@ def create_category():
                 result = category_schema.dump(new_category)
 
                 return form_response(result)
-            else:
-                return form_response(error="Bad request"), 400
+            return form_response(error="Bad request"), 400
 
     return form_response(error="Unauthorized"), 401
 
@@ -139,6 +138,51 @@ def get_threads():
     result.reverse()
 
     return form_response(result)
+
+
+@api.post("/threads/", strict_slashes=False)
+def create_thread():
+    """Create a thread"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        if ("cat_id" and "title" and "content") in request.form:
+            cat_id = request.form["cat_id"].strip()
+            title = request.form["title"].strip()
+            content = request.form["content"].strip()
+            attachment_filename = None
+
+            if "attachment" in request.files:
+                attachment = request.files["attachment"]
+
+                attachment_filename = generate_uploads_filename(attachment)
+
+                save_to_uploads(attachment, attachment_filename)
+
+            new_thread = Thread(
+                cat_id=cat_id,
+                title=title,
+                content=content,
+                creator=current_user.id,
+                attachment_filename=attachment_filename
+            )
+
+            category = Category.query.filter_by(id=cat_id).first()
+
+            db.session.add(new_thread)
+            category.last_active_user = current_user.id
+            category.last_activity_date = db.func.current_timestamp()
+            db.session.commit()
+
+            thread_schema = ThreadSchema()
+            result = thread_schema.dump(new_thread)
+
+            return result
+
+        return form_response(error="Bad request"), 400
+
+    return form_response(error="Unauthorized"), 401
 
 
 @api.get("/threads/<int:thread_id>/", strict_slashes=False)
