@@ -50,6 +50,29 @@ def get_user(username: str):
     return form_response(result)
 
 
+@api.get("/users/<username>/toggle-mod")
+def toggle_mod(username: str):
+    """Toggle moderation privileges for a user (requires admin privileges)"""
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or user.deleted:
+        return form_response(error="User not found"), 404
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        if current_user.role == "admin":
+            user.role = "moderator" if user.role == "user" else "user"
+
+            db.session.add(user)
+            db.session.commit()
+
+            return form_response(user.role)
+
+    return form_response(error="Unauthorized"), 401
+
+
 @api.get("/categories/", strict_slashes=False)
 def get_categories():
     """Get all categories"""
@@ -215,7 +238,7 @@ def settings():
 
         return form_response(error="Method not allowed"), 405
 
-    return form_response(error="Unauthorised"), 401
+    return form_response(error="Unauthorized"), 401
 
 
 @api.get("/inbox/", strict_slashes=False)
@@ -236,7 +259,7 @@ def inbox():
 
         return form_response(inbox_posts)
 
-    return form_response("Unauthorised"), 401
+    return form_response("Unauthorized"), 401
 
 
 @api.get("/whoami/", strict_slashes=False)

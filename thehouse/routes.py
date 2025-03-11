@@ -236,7 +236,7 @@ def inbox():
     return render_template("401.html"), 401
 
 
-@main.get("/~<username>/toggle-mod")  # TODO: Make API endpoint
+@main.get("/~<username>/toggle-mod")
 def toggle_mod(username: str):
     """View for toggling moderation permissions of a user"""
     user = User.query.filter_by(username=username).first()
