@@ -256,7 +256,7 @@ def promote():
     return form_response(error="Not found"), 404
 
 
-@api.route("/settings/", methods=["GET", "POST"], strict_slashes=False)
+@api.route("/settings/", methods=["GET", "PUT"], strict_slashes=False)
 def settings():
     """Display user's bio and profile picture url"""
 
@@ -275,7 +275,7 @@ def settings():
                 }
             )
 
-        if request.method == "POST":
+        if request.method == "PUT":
             altered = False
 
             if "bio" in request.form:
