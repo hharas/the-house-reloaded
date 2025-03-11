@@ -218,6 +218,65 @@ def get_posts():
     return form_response(result)
 
 
+@api.post("/posts/", strict_slashes=False)
+def create_post():
+    """Create a post"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        if ("cat_id" and "thread_id" and "content") in request.form:
+            cat_id = request.form["cat_id"].strip()
+            thread_id = request.form["thread_id"].strip()
+            content = request.form["content"].strip()
+
+            replying_to = None
+            attachment_filename = None
+
+            if "replying_to" in request.form:
+                replying_to = request.form["replying_to"]
+
+            if "attachment" in request.files:
+                attachment = request.files["attachment"]
+
+                attachment_filename = generate_uploads_filename(attachment)
+
+                save_to_uploads(attachment, attachment_filename)
+
+            new_post = Post(
+                cat_id=cat_id,
+                thread_id=thread_id,
+                content=content,
+                author=current_user.id,
+                replying_to=replying_to,
+                attachment_filename=attachment_filename
+            )
+
+            category = Category.query.filter_by(id=cat_id).first()
+            thread = Thread.query.filter_by(id=thread_id).first()
+
+            db.session.add(new_post)  # pylint: disable=duplicate-code
+
+            category.last_active_user = current_user.id  # pylint: disable=duplicate-code
+            category.last_activity_date = db.func.current_timestamp(
+            )  # pylint: disable=duplicate-code
+
+            thread.last_active_user = current_user.id  # pylint: disable=duplicate-code
+            thread.last_activity_date = db.func.current_timestamp(
+            )  # pylint: disable=duplicate-code
+
+            db.session.commit()  # pylint: disable=duplicate-code
+
+            post_schema = PostSchema()
+            result = post_schema.dump(new_post)
+
+            return result
+
+        return form_response(error="Bad request"), 400
+
+    return form_response(error="Unauthorized"), 401
+
+
 @api.get("/posts/<int:post_id>/", strict_slashes=False)
 def get_post(post_id: int):
     """Get a specific post by its id"""

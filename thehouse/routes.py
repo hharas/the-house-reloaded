@@ -353,7 +353,6 @@ def create_thread(cat_title: str):
     return render_template("401.html"), 401
 
 
-# TODO: Make API endpoint
 @main.route("/<cat_title>/<int:thread_id>/new", methods=["GET", "POST"])
 def create_post(cat_title: str, thread_id: int):
     """View for posting a comment inside a thread"""
