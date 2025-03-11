@@ -126,6 +126,41 @@ def get_category(cat_id: int):
     return form_response(result)
 
 
+@api.delete("/categories/<int:cat_id>/", strict_slashes=False)
+def delete_category(cat_id: int):
+    """Delete a category"""
+
+    current_user = authorize(request)
+    category = Category.query.filter_by(id=cat_id).first()
+    threads = Thread.query.filter_by(cat_id=category.id).all()
+    posts = Post.query.filter_by(cat_id=category.id).all()
+
+    if category:
+        if not category.deleted:
+            if current_user.role == "admin":
+                for post in posts:  # pylint: disable=duplicate-code
+                    if not post.deleted:  # pylint: disable=duplicate-code
+                        post.delete()  # pylint: disable=duplicate-code
+                        db.session.add(post)  # pylint: disable=duplicate-code
+
+                for thread in threads:  # pylint: disable=duplicate-code
+                    if not thread.deleted:  # pylint: disable=duplicate-code
+                        thread.delete()  # pylint: disable=duplicate-code
+                        db.session.add(
+                            thread)  # pylint: disable=duplicate-code
+
+                category.delete()  # pylint: disable=duplicate-code
+                db.session.add(category)  # pylint: disable=duplicate-code
+
+                db.session.commit()  # pylint: disable=duplicate-code
+
+                return "Category deleted successfully!"
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="Category not found"), 404
+
+
 @api.get("/threads/", strict_slashes=False)
 def get_threads():
     """Get all threads"""

@@ -724,7 +724,7 @@ def delete_user(username: str):
     return render_template("404.html"), 404
 
 
-@main.get("/<cat_title>/delete")  # TODO: Make API endpoint
+@main.get("/<cat_title>/delete")
 def delete_category(cat_title: str):
     """View for deleting a category"""
 
