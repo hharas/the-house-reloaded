@@ -808,7 +808,6 @@ def delete_thread(cat_title: str, thread_id: int):
     return render_template("404.html"), 404
 
 
-# TODO: Make API endpoint
 @main.get("/<cat_title>/<int:thread_id>/<int:post_id>/delete")
 def delete_post(cat_title: str, thread_id: int, post_id: int):
     """View for deleting a post"""

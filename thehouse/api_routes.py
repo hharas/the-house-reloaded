@@ -293,6 +293,30 @@ def get_post(post_id: int):
     return form_response(result)
 
 
+@api.delete("/posts/<int:post_id>/", strict_slashes=False)
+def delete_post(post_id: int):
+    """Delete a post"""
+
+    current_user = authorize(request)
+    post = Post.query.filter_by(id=post_id).first()
+    author = User.query.filter_by(id=post.author).first()
+
+    if post:
+        if not post.deleted:
+            if current_user.role == "admin" or \
+                (current_user.role == "moderator" and author.role == "user") or \
+                    current_user.id == author.id:
+                post.delete()
+                db.session.add(post)
+                db.session.commit()
+
+                return "Post deleted successfully!"
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="Post not found"), 404
+
+
 @api.post("/promote/", strict_slashes=False)
 def promote():
     """Promote a user to admin"""
