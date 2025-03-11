@@ -85,6 +85,30 @@ def get_categories():
     return form_response(result)
 
 
+@api.post("/categories/", strict_slashes=False)
+def create_category():
+    """Create a category"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        if current_user.role == "admin":
+            if ("title" and "description") in request.json:
+                category_schema = CategorySchema()
+
+                new_category = Category(
+                    title=request.json["title"], description=request.json["description"])
+
+                db.session.add(new_category)
+                db.session.commit()
+
+                result = category_schema.dump(new_category)
+
+                return form_response(result)
+
+    return form_response(error="Unauthorized"), 401
+
+
 @api.get("/categories/<int:cat_id>/", strict_slashes=False)
 def get_category(cat_id: int):
     """Get a specific category by its id"""

@@ -274,7 +274,7 @@ def logout():
         else redirect(url_for("main.index"))
 
 
-@main.route("/new", methods=["GET", "POST"])  # TODO: Make API endpoint
+@main.route("/new", methods=["GET", "POST"])
 def create_category():
     """Create category page"""
 
