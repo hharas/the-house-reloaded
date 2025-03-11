@@ -765,7 +765,7 @@ def delete_category(cat_title: str):
     return render_template("404.html"), 404
 
 
-@main.get("/<cat_title>/<int:thread_id>/delete")  # TODO: Make API endpoint
+@main.get("/<cat_title>/<int:thread_id>/delete")
 def delete_thread(cat_title: str, thread_id: int):
     """View for deleting a thread"""
 

@@ -204,6 +204,34 @@ def get_thread(thread_id: int):
     return form_response(result)
 
 
+@api.delete("/threads/<int:thread_id>/", strict_slashes=False)
+def delete_thread(thread_id: int):
+    """Delete a thread"""
+
+    current_user = authorize(request)
+    thread = Thread.query.filter_by(id=thread_id).first()
+    creator = User.query.filter_by(id=thread.creator).first()
+
+    if thread:
+        if not thread.deleted:
+            if current_user.role == "admin" or \
+                (current_user.role == "moderator" and creator.role == "user") or \
+                    current_user.id == creator.id:
+                for post in Post.query.filter_by(thread_id=thread.id).all():  # pylint: disable=duplicate-code
+                    post.delete()  # pylint: disable=duplicate-code
+                    db.session.add(post)  # pylint: disable=duplicate-code
+
+                thread.delete()  # pylint: disable=duplicate-code
+                db.session.add(thread)  # pylint: disable=duplicate-code
+                db.session.commit()  # pylint: disable=duplicate-code
+
+                return "Thread deleted successfully!"
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="Thread not found"), 404
+
+
 @api.get("/posts/", strict_slashes=False)
 def get_posts():
     """Get all posts"""
