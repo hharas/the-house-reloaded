@@ -105,6 +105,8 @@ def create_category():
                 result = category_schema.dump(new_category)
 
                 return form_response(result)
+            else:
+                return form_response(error="Bad request"), 400
 
     return form_response(error="Unauthorized"), 401
 
