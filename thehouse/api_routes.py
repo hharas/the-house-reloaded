@@ -50,7 +50,7 @@ def get_user(username: str):
     return form_response(result)
 
 
-@api.get("/users/<username>/toggle-mod")
+@api.get("/users/<username>/toggle-mod/", strict_slashes=False)
 def toggle_mod(username: str):
     """Toggle moderation privileges for a user (requires admin privileges)"""
 
