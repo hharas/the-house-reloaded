@@ -4,11 +4,11 @@ A python rewrite in flask of the original [The House](https://github.com/hharas/
 
 The House is an old-school social board in which users can participate in posting threads, commenting on threads and interacting with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a [RESTful API](https://github.com/hharas/the-house-reloaded/wiki/API-Documentation) that can be used to make alternative clients. THR's web interface does not use any javascript.
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-  <img src="./screenshots/home.png" alt="Homepage screenshot" style="width: 100%; height: auto;"/>
-  <img src="./screenshots/thread.png" alt="Thread screenshot" style="width: 100%; height: auto;"/>
-  <img src="./screenshots/home-dark.png" alt="Homepage screenshot (with dark mode)" style="width: 100%; height: auto;"/>
-  <img src="./screenshots/thread-dark.png" alt="Thread screenshot (with dark mode)" style="width: 100%; height: auto;"/>
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+  <img src="https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home.png" alt="Homepage screenshot" style="width: 100%; height: auto;"/>
+  <img src="https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread.png" alt="Thread screenshot" style="width: 100%; height: auto;"/>
+  <img src="https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home-dark.png" alt="Homepage screenshot (with dark mode)" style="width: 100%; height: auto;"/>
+  <img src="https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread-dark.png" alt="Thread screenshot (with dark mode)" style="width: 100%; height: auto;"/>
 </div>
 
 ## Setup
