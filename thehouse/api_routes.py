@@ -3,7 +3,7 @@ The House reloaded
 API Routes
 """
 
-from flask import Blueprint, current_app, request, url_for
+from flask import Blueprint, current_app, request
 
 from .extensions import db
 from .models import Category, Post, Thread, User
@@ -51,27 +51,62 @@ def get_user(username: str):
     return form_response(result)
 
 
-@api.get("/users/<username>/toggle-mod/", strict_slashes=False)
-def toggle_mod(username: str):
-    """Toggle moderation privileges for a user (requires admin privileges)"""
-
-    user = User.query.filter_by(username=username).first()
-
-    if not user or user.deleted:
-        return form_response(error="User not found"), 404
+@api.put("/users/<username>/", strict_slashes=False)
+def edit_user(username: str):
+    """Edit user data"""
 
     current_user = authorize(request)
+    user = User.query.filter_by(username=username).first()
 
-    if current_user is not None:
-        if current_user.role == "admin":
-            user.role = "moderator" if user.role == "user" else "user"
+    if user:
+        if not user.deleted:
+            altered = False
 
-            db.session.add(user)
-            db.session.commit()
+            if "role" in request.form:
+                if current_user.role == "admin":
+                    if request.form["role"] == ("user" or "moderator"):
+                        user.role = request.form["role"]
+                        altered = True
 
-            return form_response(user.role)
+                    return form_response(error="Bad request"), 400
 
-    return form_response(error="Unauthorized"), 401
+                return form_response("Unauthorized"), 401
+
+            if "bio" in request.form:
+                if (current_user.role == "admin") or \
+                        (current_user.id == user.id):
+                    user.bio = request.form["bio"].strip()
+                    altered = True
+
+                return form_response("Unauthorized"), 401
+
+            if "picture" in request.files:
+                if (current_user.role == "admin") or \
+                        (current_user.id == user.id):
+                    picture = request.files["picture"]
+
+                    if current_user.picture_filename:
+                        delete_upload(current_user.picture_filename)
+
+                    profile_picture_filename = generate_uploads_filename(
+                        picture)
+
+                    current_user.picture_filename = profile_picture_filename
+
+                    if len(current_user.picture_filename) > 0:
+                        save_to_uploads(picture, current_user.picture_filename)
+
+                    altered = True
+
+                return form_response("Unauthorized"), 401
+
+            if altered:
+                db.session.add(current_user)
+                db.session.commit()
+
+                return form_response("Changes committed successfully!")
+
+    return form_response(error="User not found"), 404
 
 
 @api.delete("/users/<username>/", strict_slashes=False)
@@ -437,61 +472,6 @@ def promote():
                         return form_response("Promoted Successfully!")
 
     return form_response(error="Not found"), 404
-
-
-@api.route("/settings/", methods=["GET", "PUT"], strict_slashes=False)
-def settings():
-    """Display user's bio and profile picture url"""
-
-    current_user = authorize(request)
-
-    if current_user is not None:
-        if request.method == "GET":
-            return form_response(
-                {
-                    "bio": current_user.bio,
-                    "picture_url": url_for(
-                        "main.uploads",
-                        filename=current_user.picture_filename,
-                        _external=True
-                    )
-                }
-            )
-
-        if request.method == "PUT":
-            altered = False
-
-            if "bio" in request.form:
-                current_user.bio = request.form["bio"].strip()
-                altered = True
-
-            if "picture" in request.files:
-                picture = request.files["picture"]
-
-                if current_user.picture_filename:
-                    delete_upload(current_user.picture_filename)
-
-                profile_picture_filename = generate_uploads_filename(
-                    picture)
-
-                current_user.picture_filename = profile_picture_filename
-
-                if len(current_user.picture_filename) > 0:
-                    save_to_uploads(picture, current_user.picture_filename)
-
-                altered = True
-
-            if altered:
-                db.session.add(current_user)
-                db.session.commit()
-
-                return form_response(result="Changes committed successfully!")
-
-            return form_response(result="No changes were made")
-
-        return form_response(error="Method not allowed"), 405
-
-    return form_response(error="Unauthorized"), 401
 
 
 @api.get("/inbox/", strict_slashes=False)
