@@ -35,6 +35,7 @@ class User(db.Model, UserMixin):  # pylint: disable=too-few-public-methods
 
         if self.picture_filename:
             delete_upload(self.picture_filename)
+            self.picture_filename = None
 
 
 class Category(db.Model):  # pylint: disable=too-few-public-methods
