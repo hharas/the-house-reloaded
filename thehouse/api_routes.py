@@ -52,8 +52,8 @@ def get_user(username: str):
 
 
 @api.put("/users/<username>/", strict_slashes=False)
-def edit_user(username: str):
-    """Edit user data"""
+def update_user(username: str):
+    """Update user data"""
 
     current_user = authorize(request)
     user = User.query.filter_by(username=username).first()
@@ -67,8 +67,8 @@ def edit_user(username: str):
                     if request.form["role"] == ("user" or "moderator"):
                         user.role = request.form["role"]
                         altered = True
-
-                    return form_response(error="Bad request"), 400
+                    else:
+                        return form_response(error="Bad request"), 400
 
                 return form_response("Unauthorized"), 401
 
@@ -77,8 +77,8 @@ def edit_user(username: str):
                         (current_user.id == user.id):
                     user.bio = request.form["bio"].strip()
                     altered = True
-
-                return form_response("Unauthorized"), 401
+                else:
+                    return form_response("Unauthorized"), 401
 
             if "picture" in request.files:
                 if (current_user.role == "admin") or \
@@ -97,8 +97,8 @@ def edit_user(username: str):
                         save_to_uploads(picture, current_user.picture_filename)
 
                     altered = True
-
-                return form_response("Unauthorized"), 401
+                else:
+                    return form_response("Unauthorized"), 401
 
             if altered:
                 db.session.add(current_user)
