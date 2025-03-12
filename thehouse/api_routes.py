@@ -22,7 +22,8 @@ def authorize(payload):
     ).first()
 
     if user is not None:
-        return user
+        if not user.deleted:
+            return user
 
     return None
 
@@ -31,7 +32,7 @@ def authorize(payload):
 def index():
     """API status message"""
 
-    return "It's working!"
+    return form_response("It's working!")
 
 
 @api.get("/users/<username>/", strict_slashes=False)
@@ -71,6 +72,42 @@ def toggle_mod(username: str):
             return form_response(user.role)
 
     return form_response(error="Unauthorized"), 401
+
+
+@api.delete("/users/<username>/", strict_slashes=False)
+def delete_user(username: str):
+    """Delete a user"""
+
+    current_user = authorize(request)
+    user = User.query.filter_by(username=username).first()
+    threads = Thread.query.filter_by(creator=user.id).all()
+    posts = Post.query.filter_by(author=user.id).all()
+
+    if user:
+        if not user.deleted:
+            if current_user.role == "admin" or \
+                    current_user.id == user.id:
+                for post in posts:  # pylint: disable=duplicate-code
+                    if not post.deleted:  # pylint: disable=duplicate-code
+                        post.delete()  # pylint: disable=duplicate-code
+                        db.session.add(post)  # pylint: disable=duplicate-code
+
+                for thread in threads:  # pylint: disable=duplicate-code
+                    if not thread.deleted:  # pylint: disable=duplicate-code
+                        thread.delete()  # pylint: disable=duplicate-code
+                        db.session.add(
+                            thread)  # pylint: disable=duplicate-code
+
+                user.delete()  # pylint: disable=duplicate-code
+                db.session.add(user)  # pylint: disable=duplicate-code
+
+                db.session.commit()  # pylint: disable=duplicate-code
+
+                return form_response("User deleted successfully!")
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="User not found"), 404
 
 
 @api.get("/categories/", strict_slashes=False)
@@ -154,7 +191,7 @@ def delete_category(cat_id: int):
 
                 db.session.commit()  # pylint: disable=duplicate-code
 
-                return "Category deleted successfully!"
+                return form_response("Category deleted successfully!")
 
             return form_response(error="Unauthorized"), 401
 
@@ -260,7 +297,7 @@ def delete_thread(thread_id: int):
                 db.session.add(thread)  # pylint: disable=duplicate-code
                 db.session.commit()  # pylint: disable=duplicate-code
 
-                return "Thread deleted successfully!"
+                return form_response("Thread deleted successfully!")
 
             return form_response(error="Unauthorized"), 401
 
@@ -373,7 +410,7 @@ def delete_post(post_id: int):
                 db.session.add(post)
                 db.session.commit()
 
-                return "Post deleted successfully!"
+                return form_response("Post deleted successfully!")
 
             return form_response(error="Unauthorized"), 401
 

@@ -679,7 +679,7 @@ def view_thread(cat_title: str, thread_id: int):
     return render_template("404.html"), 404
 
 
-@main.get("/~<username>/delete")  # TODO: Make API endpoint
+@main.get("/~<username>/delete")
 def delete_user(username: str):
     """View for deleting a user"""
 
