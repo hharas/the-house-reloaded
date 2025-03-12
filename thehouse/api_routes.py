@@ -106,6 +106,8 @@ def edit_user(username: str):
 
                 return form_response("Changes committed successfully!")
 
+            return form_response("No changes where made.")
+
     return form_response(error="User not found"), 404
 
 
