@@ -30,6 +30,17 @@ The House is an old-school social board in which users can participate in postin
 
 Uploads by users will be stored in `uploads/`, static files such as styles and the favicons are present in `static/`.
 
+## TODO
+
+To be implemented:
+- [x] A full reimplementation of the original The House
+- [x] RESTful API
+- [ ] Paging
+- [ ] Ability to lock a thread
+- [ ] Ability to pin a thread
+- [ ] Banning users
+- [ ] Simple captcha for logins and registrations
+
 ## License
 
 The House Reloaded is licensed under the GNU General Public License V3.0.
