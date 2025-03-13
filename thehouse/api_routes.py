@@ -200,6 +200,43 @@ def get_category(cat_id: int):
     return form_response(result)
 
 
+@api.put("/categories/<int:cat_id>/", strict_slashes=False)
+def update_category(cat_id: int):
+    """Update a category"""
+
+    current_user = authorize(request)
+    category = Category.query.filter_by(id=cat_id).first()
+
+    if category:
+        if not category.deleted:
+            if current_user.role == "admin":
+                updated = False
+
+                if "title" in request.form:
+                    category.title = request.form["title"]
+                    updated = True
+
+                if "description" in request.form:
+                    category.description = request.form["description"]
+                    updated = True
+
+                if updated:
+                    db.session.add(category)
+                    db.session.commit()
+
+                    category_schema = CategorySchema()
+
+                    result = category_schema.dump(category)
+
+                    return form_response(result)
+
+                return form_response("No changes were made.")
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="Post not found"), 404
+
+
 @api.delete("/categories/<int:cat_id>/", strict_slashes=False)
 def delete_category(cat_id: int):
     """Delete a category"""
