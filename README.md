@@ -2,15 +2,15 @@
 
 A python rewrite in flask of the original [The House](https://github.com/hharas/the-house) board that was written in PHP.
 
-The House is an old-school social board in which users can participate in posting threads, commenting on threads and interacting with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a [RESTful API](https://github.com/hharas/the-house-reloaded/wiki/API-Documentation) that can be used to make alternative clients. THR's web interface does not use any javascript.
+The House is an old-school social board in which users can participate in posting threads, commenting on threads and interacting with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a [RESTful API](https://codeberg.org/haras/the-house-reloaded/wiki/API-Documentation) that can be used to make alternative clients. THR's web interface does not use any javascript.
 
-[![Homepage screenshot](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home.png)
+[![Homepage screenshot](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/home.png)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/home.png)
 
-[![Thread screenshot](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread.png)
+[![Thread screenshot](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/thread.png)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/thread.png)
 
-[![Homepage screenshot (with dark mode)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home-dark.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home-dark.png)
+[![Homepage screenshot (with dark mode)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/home-dark.png)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/home-dark.png)
 
-[![Thread screenshot (with dark mode)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread-dark.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread-dark.png)
+[![Thread screenshot (with dark mode)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/thread-dark.png)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/thread-dark.png)
 
 ## Setup
 
