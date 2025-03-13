@@ -313,6 +313,60 @@ def get_thread(thread_id: int):
     return form_response(result)
 
 
+@api.put("/threads/<int:thread_id>/", strict_slashes=False)
+def update_thread(thread_id: int):
+    """Update a thread"""
+
+    current_user = authorize(request)
+    thread = Thread.query.filter_by(id=thread_id).first()
+    creator = User.query.filter_by(id=thread.creator).first()
+
+    if thread:
+        if not thread.deleted:
+            if current_user.id == creator.id:
+                updated = False
+
+                if "title" in request.form:
+                    thread.title = request.form["title"]
+                    updated = True
+
+                if "content" in request.form:
+                    thread.content = request.form["content"]
+                    updated = True
+
+                if "attachment" in request.files:
+                    attachment = request.files["attachment"]
+
+                    if thread.attachment_filename:
+                        delete_upload(thread.attachment_filename)
+
+                    new_attachment_filename = generate_uploads_filename(
+                        attachment)
+
+                    thread.attachment_filename = new_attachment_filename
+
+                    if len(thread.attachment_filename) > 0:
+                        save_to_uploads(attachment, thread.attachment_filename)
+
+                    updated = True
+
+                if updated:
+                    db.session.add(thread)
+                    db.session.commit()
+
+                    thread_schema = ThreadSchema()
+
+                    result = thread_schema.dump(thread)
+
+                    return form_response(result)
+
+                return form_response("No changes were made.")
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="Post not found"), 404
+
+
 @api.delete("/threads/<int:thread_id>/", strict_slashes=False)
 def delete_thread(thread_id: int):
     """Delete a thread"""
