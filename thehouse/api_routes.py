@@ -35,6 +35,63 @@ def index():
     return form_response("It's working!")
 
 
+@api.get("/whoami/", strict_slashes=False)
+def whoami():
+    """Confirm a user's login"""
+
+    user = authorize(request)
+
+    if user is not None:
+        return form_response(user.username)
+
+    return form_response(None)
+
+
+@api.get("/inbox/", strict_slashes=False)
+def inbox():
+    """Retrieve the user's reply inbox"""
+
+    current_user = authorize(request)
+
+    if current_user is not None:
+        post_schema = PostSchema()
+
+        inbox_posts = []
+
+        for post in get_inbox(current_user, Post):
+            inbox_posts.append(post_schema.dump(post))
+
+        inbox_posts.reverse()  # Show more recent posts first
+
+        return form_response(inbox_posts)
+
+    return form_response("Unauthorized"), 401
+
+
+@api.post("/promote/", strict_slashes=False)
+def promote():
+    """Promote a user to admin"""
+
+    current_user = authorize(request)
+
+    if (current_user is not None) and \
+        (current_user.role != "admin") and \
+        (current_app.config["ENABLE_ADMIN_KEY"]) and \
+        (current_app.config["ADMIN_KEY"] is not None) and \
+        ("key" in request.form) and \
+            (request.form["key"] == current_app.config["ADMIN_KEY"]):
+        user = User.query.filter_by(
+            id=current_user.id).first()
+        user.role = "admin"
+
+        db.session.add(user)
+        db.session.commit()
+
+        return form_response("Promoted Successfully!")
+
+    return form_response(error="Not found"), 404
+
+
 @api.get("/users/<username>/", strict_slashes=False)
 def get_user(username: str):
     """Get a specific user by its id"""
@@ -147,18 +204,6 @@ def delete_user(username: str):
     return form_response(error="User not found"), 404
 
 
-@api.get("/categories/", strict_slashes=False)
-def get_categories():
-    """Get all categories"""
-
-    categories_schema = CategorySchema(many=True)
-
-    categories = Category.query.filter_by(deleted=False).all()
-    result = categories_schema.dump(categories)
-
-    return form_response(result)
-
-
 @api.post("/categories/", strict_slashes=False)
 def create_category():
     """Create a category"""
@@ -182,6 +227,18 @@ def create_category():
             return form_response(error="Bad request"), 400
 
     return form_response(error="Unauthorized"), 401
+
+
+@api.get("/categories/", strict_slashes=False)
+def get_categories():
+    """Get all categories"""
+
+    categories_schema = CategorySchema(many=True)
+
+    categories = Category.query.filter_by(deleted=False).all()
+    result = categories_schema.dump(categories)
+
+    return form_response(result)
 
 
 @api.get("/categories/<int:cat_id>/", strict_slashes=False)
@@ -272,20 +329,6 @@ def delete_category(cat_id: int):
     return form_response(error="Category not found"), 404
 
 
-@api.get("/threads/", strict_slashes=False)
-def get_threads():
-    """Get all threads"""
-
-    threads_schema = ThreadSchema(many=True)
-
-    threads = Thread.query.filter_by(deleted=False).all()
-    result = threads_schema.dump(threads)
-
-    result.reverse()
-
-    return form_response(result)
-
-
 @api.post("/threads/", strict_slashes=False)
 def create_thread():
     """Create a thread"""
@@ -329,6 +372,20 @@ def create_thread():
         return form_response(error="Bad request"), 400
 
     return form_response(error="Unauthorized"), 401
+
+
+@api.get("/threads/", strict_slashes=False)
+def get_threads():
+    """Get all threads"""
+
+    threads_schema = ThreadSchema(many=True)
+
+    threads = Thread.query.filter_by(deleted=False).all()
+    result = threads_schema.dump(threads)
+
+    result.reverse()
+
+    return form_response(result)
 
 
 @api.get("/threads/<int:thread_id>/", strict_slashes=False)
@@ -432,20 +489,6 @@ def delete_thread(thread_id: int):
     return form_response(error="Thread not found"), 404
 
 
-@api.get("/posts/", strict_slashes=False)
-def get_posts():
-    """Get all posts"""
-
-    posts_schema = PostSchema(many=True)
-
-    posts = Post.query.filter_by(deleted=False).all()
-    result = posts_schema.dump(posts)
-
-    result.reverse()
-
-    return form_response(result)
-
-
 @api.post("/posts/", strict_slashes=False)
 def create_post():
     """Create a post"""
@@ -503,6 +546,20 @@ def create_post():
         return form_response(error="Bad request"), 400
 
     return form_response(error="Unauthorized"), 401
+
+
+@api.get("/posts/", strict_slashes=False)
+def get_posts():
+    """Get all posts"""
+
+    posts_schema = PostSchema(many=True)
+
+    posts = Post.query.filter_by(deleted=False).all()
+    result = posts_schema.dump(posts)
+
+    result.reverse()
+
+    return form_response(result)
 
 
 @api.get("/posts/<int:post_id>/", strict_slashes=False)
@@ -593,60 +650,3 @@ def delete_post(post_id: int):
             return form_response(error="Unauthorized"), 401
 
     return form_response(error="Post not found"), 404
-
-
-@api.post("/promote/", strict_slashes=False)
-def promote():
-    """Promote a user to admin"""
-
-    current_user = authorize(request)
-
-    if current_user is not None:
-        if current_user.role != "admin":
-            if current_app.config["ENABLE_ADMIN_KEY"]:
-                if current_app.config["ADMIN_KEY"] is not None:
-                    if "key" in request.form:
-                        if request.form["key"] == current_app.config["ADMIN_KEY"]:
-                            user = User.query.filter_by(
-                                id=current_user.id).first()
-                            user.role = "admin"
-
-                            db.session.add(user)
-                            db.session.commit()
-
-                            return form_response("Promoted Successfully!")
-
-    return form_response(error="Not found"), 404
-
-
-@api.get("/inbox/", strict_slashes=False)
-def inbox():
-    """Retrieve the user's reply inbox"""
-
-    current_user = authorize(request)
-
-    if current_user is not None:
-        post_schema = PostSchema()
-
-        inbox_posts = []
-
-        for post in get_inbox(current_user, Post):
-            inbox_posts.append(post_schema.dump(post))
-
-        inbox_posts.reverse()  # Show more recent posts first
-
-        return form_response(inbox_posts)
-
-    return form_response("Unauthorized"), 401
-
-
-@api.get("/whoami/", strict_slashes=False)
-def whoami():
-    """Confirm a user's login"""
-
-    user = authorize(request)
-
-    if user is not None:
-        return form_response(user.username)
-
-    return form_response(None)
