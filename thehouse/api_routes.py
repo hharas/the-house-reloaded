@@ -430,6 +430,56 @@ def get_post(post_id: int):
     return form_response(result)
 
 
+@api.put("/posts/<int:post_id>/", strict_slashes=False)
+def update_post(post_id: int):
+    """Update a post"""
+
+    current_user = authorize(request)
+    post = Post.query.filter_by(id=post_id).first()
+    author = User.query.filter_by(id=post.author).first()
+
+    if post:
+        if not post.deleted:
+            if current_user.id == author.id:
+                updated = False
+
+                if "content" in request.form:
+                    post.content = request.form["content"]
+                    updated = True
+
+                if "attachment" in request.files:
+                    attachment = request.files["attachment"]
+
+                    if post.attachment_filename:
+                        delete_upload(post.attachment_filename)
+
+                    new_attachment_filename = generate_uploads_filename(
+                        attachment)
+
+                    post.attachment_filename = new_attachment_filename
+
+                    if len(post.attachment_filename) > 0:
+                        save_to_uploads(attachment, post.attachment_filename)
+
+                    updated = True
+
+                if updated:
+                    db.session.add(post)
+                    db.session.commit()
+
+                    post_schema = PostSchema()
+
+                    result = post_schema.dump(post)
+
+                    return form_response(result)
+
+                return form_response("No changes were made.")
+
+            return form_response(error="Unauthorized"), 401
+
+    return form_response(error="Post not found"), 404
+
+
 @api.delete("/posts/<int:post_id>/", strict_slashes=False)
 def delete_post(post_id: int):
     """Delete a post"""
