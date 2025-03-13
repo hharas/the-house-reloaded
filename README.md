@@ -5,17 +5,17 @@ A python rewrite in flask of the original [The House](https://github.com/hharas/
 The House is an old-school social board in which users can participate in posting threads, commenting on threads and interacting with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a [RESTful API](https://github.com/hharas/the-house-reloaded/wiki/API-Documentation) that can be used to make alternative clients. THR's web interface does not use any javascript.
 
 [![Homepage screenshot](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home.png)
-<br />
+
 [![Thread screenshot](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread.png)
-<br />
+
 [![Homepage screenshot (with dark mode)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home-dark.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/home-dark.png)
-<br />
+
 [![Thread screenshot (with dark mode)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread-dark.png)](https://raw.githubusercontent.com/hharas/the-house-reloaded/refs/heads/master/screenshots/thread-dark.png)
 
 ## Setup
 
 1. Clone the repository & `cd` into it.
-2. `$ make setup`
+2. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
 3. `$ make db-setup`
 4. Set the following environment variables:
     - `THR_SECRET_KEY`: Flask-Login secret key, should be really hard to guess (required).
@@ -33,6 +33,7 @@ Uploads by users will be stored in `uploads/`, static files such as styles and t
 ## TODO
 
 To be implemented:
+
 - [x] A full reimplementation of the original The House
 - [x] RESTful API
 - [ ] Paging

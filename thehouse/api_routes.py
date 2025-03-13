@@ -8,8 +8,13 @@ from flask import Blueprint, current_app, request
 from .extensions import db
 from .models import Category, Post, Thread, User
 from .schemas import CategorySchema, PostSchema, ThreadSchema, UserSchema
-from .utils import (delete_upload, form_response, generate_uploads_filename,
-                    get_inbox, save_to_uploads)
+from .utils import (
+    delete_upload,
+    form_response,
+    generate_uploads_filename,
+    get_inbox,
+    save_to_uploads,
+)
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -17,9 +22,7 @@ api = Blueprint("api", __name__, url_prefix="/api")
 def authorize(payload):
     """Authorize an API User"""
 
-    user = User.query.filter_by(
-        token=payload.headers.get("Authorization")
-    ).first()
+    user = User.query.filter_by(token=payload.headers.get("Authorization")).first()
 
     if user is not None:
         if not user.deleted:
@@ -28,7 +31,7 @@ def authorize(payload):
     return None
 
 
-@api.get('/')
+@api.get("/")
 def index():
     """API status message"""
 
@@ -74,14 +77,15 @@ def promote():
 
     current_user = authorize(request)
 
-    if (current_user is not None) and \
-        (current_user.role != "admin") and \
-        (current_app.config["ENABLE_ADMIN_KEY"]) and \
-        (current_app.config["ADMIN_KEY"] is not None) and \
-        ("key" in request.form) and \
-            (request.form["key"] == current_app.config["ADMIN_KEY"]):
-        user = User.query.filter_by(
-            id=current_user.id).first()
+    if (
+        (current_user is not None)
+        and (current_user.role != "admin")
+        and (current_app.config["ENABLE_ADMIN_KEY"])
+        and (current_app.config["ADMIN_KEY"] is not None)
+        and ("key" in request.form)
+        and (request.form["key"] == current_app.config["ADMIN_KEY"])
+    ):
+        user = User.query.filter_by(id=current_user.id).first()
         user.role = "admin"
 
         db.session.add(user)
@@ -130,23 +134,20 @@ def update_user(username: str):
                 return form_response("Unauthorized"), 401
 
             if "bio" in request.form:
-                if (current_user.role == "admin") or \
-                        (current_user.id == user.id):
+                if (current_user.role == "admin") or (current_user.id == user.id):
                     user.bio = request.form["bio"].strip()
                     altered = True
                 else:
                     return form_response("Unauthorized"), 401
 
             if "picture" in request.files:
-                if (current_user.role == "admin") or \
-                        (current_user.id == user.id):
+                if (current_user.role == "admin") or (current_user.id == user.id):
                     picture = request.files["picture"]
 
                     if current_user.picture_filename:
                         delete_upload(current_user.picture_filename)
 
-                    profile_picture_filename = generate_uploads_filename(
-                        picture)
+                    profile_picture_filename = generate_uploads_filename(picture)
 
                     current_user.picture_filename = profile_picture_filename
 
@@ -179,8 +180,7 @@ def delete_user(username: str):
 
     if user:
         if not user.deleted:
-            if current_user.role == "admin" or \
-                    current_user.id == user.id:
+            if current_user.role == "admin" or current_user.id == user.id:
                 for post in posts:  # pylint: disable=duplicate-code
                     if not post.deleted:  # pylint: disable=duplicate-code
                         post.delete()  # pylint: disable=duplicate-code
@@ -189,8 +189,7 @@ def delete_user(username: str):
                 for thread in threads:  # pylint: disable=duplicate-code
                     if not thread.deleted:  # pylint: disable=duplicate-code
                         thread.delete()  # pylint: disable=duplicate-code
-                        db.session.add(
-                            thread)  # pylint: disable=duplicate-code
+                        db.session.add(thread)  # pylint: disable=duplicate-code
 
                 user.delete()  # pylint: disable=duplicate-code
                 db.session.add(user)  # pylint: disable=duplicate-code
@@ -216,7 +215,8 @@ def create_category():
                 category_schema = CategorySchema()
 
                 new_category = Category(
-                    title=request.form["title"], description=request.form["description"])
+                    title=request.form["title"], description=request.form["description"]
+                )
 
                 db.session.add(new_category)
                 db.session.commit()
@@ -314,8 +314,7 @@ def delete_category(cat_id: int):
                 for thread in threads:  # pylint: disable=duplicate-code
                     if not thread.deleted:  # pylint: disable=duplicate-code
                         thread.delete()  # pylint: disable=duplicate-code
-                        db.session.add(
-                            thread)  # pylint: disable=duplicate-code
+                        db.session.add(thread)  # pylint: disable=duplicate-code
 
                 category.delete()  # pylint: disable=duplicate-code
                 db.session.add(category)  # pylint: disable=duplicate-code
@@ -354,7 +353,7 @@ def create_thread():
                 title=title,
                 content=content,
                 creator=current_user.id,
-                attachment_filename=attachment_filename
+                attachment_filename=attachment_filename,
             )
 
             category = Category.query.filter_by(id=cat_id).first()
@@ -434,8 +433,7 @@ def update_thread(thread_id: int):
                     if thread.attachment_filename:
                         delete_upload(thread.attachment_filename)
 
-                    new_attachment_filename = generate_uploads_filename(
-                        attachment)
+                    new_attachment_filename = generate_uploads_filename(attachment)
 
                     thread.attachment_filename = new_attachment_filename
 
@@ -471,9 +469,11 @@ def delete_thread(thread_id: int):
 
     if thread:
         if not thread.deleted:
-            if current_user.role == "admin" or \
-                (current_user.role == "moderator" and creator.role == "user") or \
-                    current_user.id == creator.id:
+            if (
+                current_user.role == "admin"
+                or (current_user.role == "moderator" and creator.role == "user")
+                or current_user.id == creator.id
+            ):
                 for post in Post.query.filter_by(thread_id=thread.id).all():  # pylint: disable=duplicate-code
                     post.delete()  # pylint: disable=duplicate-code
                     db.session.add(post)  # pylint: disable=duplicate-code
@@ -520,7 +520,7 @@ def create_post():
                 content=content,
                 author=current_user.id,
                 replying_to=replying_to,
-                attachment_filename=attachment_filename
+                attachment_filename=attachment_filename,
             )
 
             category = Category.query.filter_by(id=cat_id).first()
@@ -529,12 +529,10 @@ def create_post():
             db.session.add(new_post)  # pylint: disable=duplicate-code
 
             category.last_active_user = current_user.id  # pylint: disable=duplicate-code
-            category.last_activity_date = db.func.current_timestamp(
-            )  # pylint: disable=duplicate-code
+            category.last_activity_date = db.func.current_timestamp()  # pylint: disable=duplicate-code
 
             thread.last_active_user = current_user.id  # pylint: disable=duplicate-code
-            thread.last_activity_date = db.func.current_timestamp(
-            )  # pylint: disable=duplicate-code
+            thread.last_activity_date = db.func.current_timestamp()  # pylint: disable=duplicate-code
 
             db.session.commit()  # pylint: disable=duplicate-code
 
@@ -601,8 +599,7 @@ def update_post(post_id: int):
                     if post.attachment_filename:
                         delete_upload(post.attachment_filename)
 
-                    new_attachment_filename = generate_uploads_filename(
-                        attachment)
+                    new_attachment_filename = generate_uploads_filename(attachment)
 
                     post.attachment_filename = new_attachment_filename
 
@@ -638,9 +635,11 @@ def delete_post(post_id: int):
 
     if post:
         if not post.deleted:
-            if current_user.role == "admin" or \
-                (current_user.role == "moderator" and author.role == "user") or \
-                    current_user.id == author.id:
+            if (
+                current_user.role == "admin"
+                or (current_user.role == "moderator" and author.role == "user")
+                or current_user.id == author.id
+            ):
                 post.delete()
                 db.session.add(post)
                 db.session.commit()

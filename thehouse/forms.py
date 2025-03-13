@@ -4,8 +4,7 @@ Form definitions
 """
 
 from flask_wtf import FlaskForm
-from wtforms import (FileField, PasswordField, StringField, SubmitField,
-                     TextAreaField)
+from wtforms import FileField, PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import InputRequired, Length, ValidationError
 
 from .extensions import bcrypt
@@ -14,10 +13,9 @@ from .models import Category, User
 
 class RegisterForm(FlaskForm):
     """Registration form class"""
-    username = StringField(validators=[InputRequired(), Length(
-        min=4, max=20)])
-    password = PasswordField(validators=[InputRequired(), Length(
-        min=4, max=300)])
+
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)])
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=300)])
     submit = SubmitField("register")
 
     def validate_username(self, field):
@@ -25,16 +23,15 @@ class RegisterForm(FlaskForm):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError("That username already exists")
 
-        if ' ' in field.data:
+        if " " in field.data:
             raise ValidationError("Username contains spaces")
 
 
 class LoginForm(FlaskForm):
     """Registration form class"""
-    username = StringField(validators=[InputRequired(), Length(
-        min=4, max=20)])
-    password = PasswordField(validators=[InputRequired(), Length(
-        min=4, max=300)])
+
+    username = StringField(validators=[InputRequired(), Length(min=4, max=20)])
+    password = PasswordField(validators=[InputRequired(), Length(min=4, max=300)])
     submit = SubmitField("login")
 
     def validate_username(self, field):
@@ -58,10 +55,9 @@ class LoginForm(FlaskForm):
 
 class CreateCategoryForm(FlaskForm):
     """New Category form class"""
-    title = StringField(validators=[InputRequired(), Length(
-        min=2, max=20)])
-    description = StringField(validators=[InputRequired(), Length(
-        min=2, max=100)])
+
+    title = StringField(validators=[InputRequired(), Length(min=2, max=20)])
+    description = StringField(validators=[InputRequired(), Length(min=2, max=100)])
     submit = SubmitField("create")
 
     def validate_title(self, field):
@@ -69,14 +65,14 @@ class CreateCategoryForm(FlaskForm):
         if Category.query.filter_by(title=field.data).first():
             raise ValidationError("Title must be unique")
 
-        if ' ' in field.data:
+        if " " in field.data:
             raise ValidationError("Title contains spaces")
 
 
 class CreateThreadForm(FlaskForm):
     """New Thread form class"""
-    title = StringField(validators=[InputRequired(), Length(
-        min=2, max=255)])
+
+    title = StringField(validators=[InputRequired(), Length(min=2, max=255)])
     content = TextAreaField()
     file = FileField()
     submit = SubmitField("create")
@@ -84,6 +80,7 @@ class CreateThreadForm(FlaskForm):
 
 class CreatePostForm(FlaskForm):
     """New post form class"""
+
     content = TextAreaField()
     file = FileField()
     submit = SubmitField("post your reply")

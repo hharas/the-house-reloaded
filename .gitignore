@@ -1,7 +1,6 @@
+.*/
 __pycache__/
-venv/
 instance/
 uploads/
 
 .env
-debug.rest

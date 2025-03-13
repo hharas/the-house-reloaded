@@ -18,21 +18,21 @@ def eprint(*args, **kwargs):
 
 def generate_uploads_filename(file_data) -> str:
     """Generate filename based on attachment extension"""
-    return str(uuid4())[:8] + '.' + \
-        file_data.filename.rsplit(".")[-1]
+    return str(uuid4())[:8] + "." + file_data.filename.rsplit(".")[-1]
 
 
 def save_to_uploads(file_data, attachment_filename: str):
     """Save attachment into uploads directory"""
-    file_data.save(os.path.join(
-        current_app.config["UPLOADS_DIRECTORY"], attachment_filename))
+    file_data.save(
+        os.path.join(current_app.config["UPLOADS_DIRECTORY"], attachment_filename)
+    )
 
 
 def render_content(value: str) -> str:
     """Turn thread/post contents into renderable HTML"""
     cleaned = bleach.clean(value)
     linkified = bleach.linkify(cleaned, parse_email=True)
-    nl2brd = linkified.replace('\n', "<br />")
+    nl2brd = linkified.replace("\n", "<br />")
 
     return nl2brd
 
@@ -40,8 +40,7 @@ def render_content(value: str) -> str:
 def delete_upload(filename: str):
     """Delete an uploaded file"""
     try:
-        os.remove(os.path.join(
-            current_app.config["UPLOADS_DIRECTORY"], filename))
+        os.remove(os.path.join(current_app.config["UPLOADS_DIRECTORY"], filename))
     except FileNotFoundError as error:
         eprint(error)
 
@@ -51,7 +50,9 @@ def get_inbox(current_user, db_post):
 
     user_post_ids = []
 
-    for user_post in db_post.query.filter_by(author=current_user.id, deleted=False).all():
+    for user_post in db_post.query.filter_by(
+        author=current_user.id, deleted=False
+    ).all():
         user_post_ids.append(user_post.id)
 
     for post in db_post.query.filter_by(deleted=False).all():
@@ -64,17 +65,14 @@ def get_inbox(current_user, db_post):
 def form_response(result="", error: str = "") -> dict:
     """Function that forms an API response"""
 
-    return {
-        "result": result or None,
-        "error": error or None
-    }
+    return {"result": result or None, "error": error or None}
 
 
 def generate_file_embed(filename: str, maxheight: int = 300) -> str:
     """Generate an HTML embed for the uploaded file"""
     result = ""
 
-    extension = filename.rsplit('.')[-1]
+    extension = filename.rsplit(".")[-1]
 
     image_extensions = ["jpg", "jpeg", "webp", "png", "gif", "jxl"]
     video_extensions = ["mp4", "webm", "mov", "avi"]

@@ -3,7 +3,6 @@ The House reloaded
 Datbase model schemas
 """
 
-
 from flask import url_for
 from marshmallow import post_dump
 
@@ -33,9 +32,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
         if data["picture_filename"]:
             data["picture_url"] = url_for(
-                "main.uploads",
-                filename=data["picture_filename"],
-                _external=True
+                "main.uploads", filename=data["picture_filename"], _external=True
             )
         else:
             data["picture_url"] = None
@@ -52,29 +49,25 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
         for thread in Thread.query.filter_by(creator=data["id"], deleted=False).all():
             activities.append(
-                {"type": "thread_creation", "data": ThreadSchema().dump(thread)})
+                {"type": "thread_creation", "data": ThreadSchema().dump(thread)}
+            )
 
         for post in Post.query.filter_by(author=data["id"], deleted=False).all():
-            activities.append(
-                {"type": "new_post", "data": PostSchema().dump(post)})
+            activities.append({"type": "new_post", "data": PostSchema().dump(post)})
 
         activities = sorted(
             activities,
             key=lambda activity: activity["data"]["creation_date"],
-            reverse=True
+            reverse=True,
         )
 
         data["recent_activities"] = []
 
         for activity in activities:
             data["recent_activities"].append(
-                {
-                    "type": activity["type"],
-                    "id": activity["data"]["id"]
-                } if activity["type"] == "thread_creation" else {
-                    "type": activity["type"],
-                    "id": activity["data"]["id"]
-                }
+                {"type": activity["type"], "id": activity["data"]["id"]}
+                if activity["type"] == "thread_creation"
+                else {"type": activity["type"], "id": activity["data"]["id"]}
             )
 
         return data
@@ -82,6 +75,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
 class CategorySchema(ma.SQLAlchemyAutoSchema):
     """Schema for category model"""
+
     class Meta:  # pylint: disable=missing-class-docstring disable=too-few-public-methods
         model = Category
 
@@ -91,10 +85,7 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
 
         data["threads"] = []
 
-        for thread in Thread.query.filter_by(
-            cat_id=data["id"],
-            deleted=False
-        ).all():
+        for thread in Thread.query.filter_by(cat_id=data["id"], deleted=False).all():
             data["threads"].append(thread.id)
 
         return data
@@ -108,11 +99,11 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
         for thread in Thread.query.filter_by(cat_id=data["id"], deleted=False):
             if not User.query.filter_by(id=thread.creator).first().deleted:
                 activities.append(
-                    {"type": "thread_creation", "data": ThreadSchema().dump(thread)})
+                    {"type": "thread_creation", "data": ThreadSchema().dump(thread)}
+                )
         for post in Post.query.filter_by(cat_id=data["id"], deleted=False):
             if not User.query.filter_by(id=post.author).first().deleted:
-                activities.append(
-                    {"type": "new_post", "data": PostSchema().dump(post)})
+                activities.append({"type": "new_post", "data": PostSchema().dump(post)})
 
         activities = sorted(
             activities,
@@ -122,20 +113,27 @@ class CategorySchema(ma.SQLAlchemyAutoSchema):
         last_activity = activities[-1] if len(activities) != 0 else None
 
         data["last_activity"] = (
-            {
-                "type": last_activity["type"],
-                "id": last_activity["data"]["id"],
-            } if last_activity["type"] == "thread_creation" else {
-                "type": last_activity["type"],
-                "id": last_activity["data"]["id"],
-            }
-        ) if last_activity else None
+            (
+                {
+                    "type": last_activity["type"],
+                    "id": last_activity["data"]["id"],
+                }
+                if last_activity["type"] == "thread_creation"
+                else {
+                    "type": last_activity["type"],
+                    "id": last_activity["data"]["id"],
+                }
+            )
+            if last_activity
+            else None
+        )
 
         return data
 
 
 class ThreadSchema(ma.SQLAlchemyAutoSchema):
     """Schema for thread model"""
+
     class Meta:  # pylint: disable=missing-class-docstring disable=too-few-public-methods
         model = Thread
 
@@ -152,11 +150,13 @@ class ThreadSchema(ma.SQLAlchemyAutoSchema):
     @post_dump
     def replace_attachment_filename(self, data, **kwargs):  # pylint: disable=unused-argument
         """replace attachment_filename field with attachment_url"""
-        data["attachment_url"] = url_for(
-            "main.uploads",
-            filename=data["attachment_filename"],
-            _external=True
-        ) if data["attachment_filename"] else None
+        data["attachment_url"] = (
+            url_for(
+                "main.uploads", filename=data["attachment_filename"], _external=True
+            )
+            if data["attachment_filename"]
+            else None
+        )
 
         del data["attachment_filename"]
 
@@ -193,11 +193,13 @@ class PostSchema(ma.SQLAlchemyAutoSchema):
     @post_dump
     def replace_attachment_filename(self, data, **kwargs):  # pylint: disable=unused-argument
         """replace attachment_filename field with attachment_url"""
-        data["attachment_url"] = url_for(
-            "main.uploads",
-            filename=data["attachment_filename"],
-            _external=True
-        ) if data["attachment_filename"] else None
+        data["attachment_url"] = (
+            url_for(
+                "main.uploads", filename=data["attachment_filename"], _external=True
+            )
+            if data["attachment_filename"]
+            else None
+        )
 
         del data["attachment_filename"]
 

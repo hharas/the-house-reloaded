@@ -7,25 +7,43 @@ from os import path
 from typing import List, Optional
 from uuid import uuid4
 
-from flask import (Blueprint, current_app, redirect, render_template, request,
-                   send_from_directory, session, url_for)
+from flask import (
+    Blueprint,
+    current_app,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    url_for,
+)
 from flask_login import current_user, login_user, logout_user
 from flask_wtf import FlaskForm
 from wtforms import FileField, StringField, SubmitField
 from wtforms.validators import Length
 
 from .extensions import bcrypt, db
-from .forms import (CreateCategoryForm, CreatePostForm, CreateThreadForm,
-                    LoginForm, RegisterForm)
+from .forms import (
+    CreateCategoryForm,
+    CreatePostForm,
+    CreateThreadForm,
+    LoginForm,
+    RegisterForm,
+)
 from .models import Category, Post, Thread, User
-from .utils import (delete_upload, generate_file_embed,
-                    generate_uploads_filename, get_inbox, render_content,
-                    save_to_uploads)
+from .utils import (
+    delete_upload,
+    generate_file_embed,
+    generate_uploads_filename,
+    get_inbox,
+    render_content,
+    save_to_uploads,
+)
 
 main = Blueprint("main", __name__)
 
 
-@main.get('/')
+@main.get("/")
 def index():
     """Homepage"""
 
@@ -37,8 +55,7 @@ def index():
         for thread in Thread.query.filter_by(cat_id=category.id):
             if not thread.deleted:
                 if not User.query.filter_by(id=thread.creator).first().deleted:
-                    category.activities.append(
-                        {"type": "thread", "data": thread})
+                    category.activities.append({"type": "thread", "data": thread})
         for post in Post.query.filter_by(cat_id=category.id):
             if not post.deleted:
                 if not User.query.filter_by(id=post.author).first().deleted:
@@ -46,7 +63,7 @@ def index():
 
         category.activities = sorted(
             category.activities,
-            key=lambda activity: activity['data'].creation_date,
+            key=lambda activity: activity["data"].creation_date,
         )
 
     return render_template(
@@ -64,8 +81,11 @@ def toggle_theme():
 
     session["theme"] = "dark" if session["theme"] == "light" else "light"
 
-    return redirect(request.referrer) if request.referrer is not None \
+    return (
+        redirect(request.referrer)
+        if request.referrer is not None
         else redirect(url_for("main.index"))
+    )
 
 
 @main.route("/login", methods=["GET", "POST"])
@@ -90,12 +110,9 @@ def login():
             ).decode("utf-8")
 
         else:
-            hashed_password = bcrypt.generate_password_hash(
-                register_form.password.data
-            )
+            hashed_password = bcrypt.generate_password_hash(register_form.password.data)
 
-        new_user = User(username=register_form.username.data,
-                        password=hashed_password)
+        new_user = User(username=register_form.username.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -104,13 +121,14 @@ def login():
         return redirect(request.args.get("referer", url_for("main.index")))
 
     if current_user.is_authenticated:
-        return redirect(request.referrer) if request.referrer is not None \
+        return (
+            redirect(request.referrer)
+            if request.referrer is not None
             else redirect(url_for("main.index"))
+        )
 
     return render_template(
-        "login.html",
-        login_form=login_form,
-        register_form=register_form
+        "login.html", login_form=login_form, register_form=register_form
     )
 
 
@@ -141,8 +159,8 @@ def settings():
 
     class SettingsForm(FlaskForm):
         """Settings form class"""
-        bio = StringField(
-            validators=[Length(min=0, max=60)], default=current_user.bio)
+
+        bio = StringField(validators=[Length(min=0, max=60)], default=current_user.bio)
         profile_picture_file = FileField()
 
         submit = SubmitField("save")
@@ -154,8 +172,7 @@ def settings():
         profile_picture_filename = ""
 
         if form.bio.data != current_user.bio:
-            user.bio = form.bio.data.strip(
-            ) if form.bio.data.strip() != "" else None
+            user.bio = form.bio.data.strip() if form.bio.data.strip() != "" else None
             db.session.add(user)
 
         if form.profile_picture_file.data:
@@ -163,7 +180,8 @@ def settings():
                 delete_upload(user.picture_filename)
 
             profile_picture_filename = generate_uploads_filename(
-                form.profile_picture_file.data)
+                form.profile_picture_file.data
+            )
 
             user.picture_filename = profile_picture_filename
             db.session.add(user)
@@ -171,8 +189,7 @@ def settings():
         db.session.commit()
 
         if len(profile_picture_filename) > 0:
-            save_to_uploads(
-                form.profile_picture_file.data, profile_picture_filename)
+            save_to_uploads(form.profile_picture_file.data, profile_picture_filename)
 
         return redirect(request.args.get("referer", url_for("main.index")))
 
@@ -208,23 +225,17 @@ def inbox():
         inbox_messages = []
 
         for post in get_inbox(current_user, Post):
-            original_post = Post.query.filter_by(
-                id=post.replying_to).first()
+            original_post = Post.query.filter_by(id=post.replying_to).first()
 
             message = {
-                "category":
-                Category.query.filter_by(id=post.cat_id).first(),
-                "thread":
-                Thread.query.filter_by(id=post.thread_id).first(),
-                "original_post":
-                original_post,
-                "original_author":
-                User.query.filter_by(
-                    id=original_post.author).first(),
-                "post":
-                post,
-                "author":
-                User.query.filter_by(id=post.author).first(),
+                "category": Category.query.filter_by(id=post.cat_id).first(),
+                "thread": Thread.query.filter_by(id=post.thread_id).first(),
+                "original_post": original_post,
+                "original_author": User.query.filter_by(
+                    id=original_post.author
+                ).first(),
+                "post": post,
+                "author": User.query.filter_by(id=post.author).first(),
             }
 
             inbox_messages.append(message)
@@ -252,10 +263,7 @@ def toggle_mod(username: str):
 
                     return redirect(url_for("main.view_user", username=user.username))
 
-                return render_template(
-                    "toggle-mod.html",
-                    user=user
-                )
+                return render_template("toggle-mod.html", user=user)
 
             return render_template("400.html"), 400
 
@@ -270,8 +278,11 @@ def logout():
 
     logout_user()
 
-    return redirect(request.referrer) if request.referrer is not None \
+    return (
+        redirect(request.referrer)
+        if request.referrer is not None
         else redirect(url_for("main.index"))
+    )
 
 
 @main.route("/new", methods=["GET", "POST"])
@@ -281,8 +292,9 @@ def create_category():
     form = CreateCategoryForm()
 
     if form.validate_on_submit():
-        new_category = Category(title=form.title.data,
-                                description=form.description.data)
+        new_category = Category(
+            title=form.title.data, description=form.description.data
+        )
         db.session.add(new_category)
         db.session.commit()
 
@@ -316,7 +328,7 @@ def create_thread(cat_title: str):
                 title=form.title.data,
                 content=form.content.data,
                 creator=current_user.id,
-                attachment_filename=attachment_filename
+                attachment_filename=attachment_filename,
             )
         else:
             attachment_filename = None
@@ -337,18 +349,12 @@ def create_thread(cat_title: str):
 
         return redirect(
             url_for(
-                "main.view_thread",
-                cat_title=category.title,
-                thread_id=new_thread.id
+                "main.view_thread", cat_title=category.title, thread_id=new_thread.id
             )
         )
 
     if current_user.is_authenticated:
-        return render_template(
-            "new-thread.html",
-            form=form,
-            category=category
-        )
+        return render_template("new-thread.html", form=form, category=category)
 
     return render_template("401.html"), 401
 
@@ -365,8 +371,7 @@ def create_post(cat_title: str, thread_id: int):
 
     if form.validate_on_submit():
         if form.file.data:
-            attachment_filename = generate_uploads_filename(
-                form.file.data)
+            attachment_filename = generate_uploads_filename(form.file.data)
 
             new_post = Post(
                 cat_id=category.id,
@@ -374,7 +379,7 @@ def create_post(cat_title: str, thread_id: int):
                 content=form.content.data,
                 author=current_user.id,
                 replying_to=reply_to,
-                attachment_filename=attachment_filename
+                attachment_filename=attachment_filename,
             )
         else:
             attachment_filename = None
@@ -401,22 +406,18 @@ def create_post(cat_title: str, thread_id: int):
             save_to_uploads(form.file.data, attachment_filename)
 
         return redirect(
-            url_for(
-                "main.view_thread",
-                cat_title=category.title,
-                thread_id=thread_id
-            ) + '#' + str(new_post.id)
+            url_for("main.view_thread", cat_title=category.title, thread_id=thread_id)
+            + "#"
+            + str(new_post.id)
         )
 
     if current_user.is_authenticated:
         if reply_to is not None:
             replied_to = Post.query.filter_by(id=reply_to).first()
 
-            if not replied_to or \
-                    (
-                        category.id != replied_to.cat_id or
-                        thread_id != replied_to.thread_id
-                    ):
+            if not replied_to or (
+                category.id != replied_to.cat_id or thread_id != replied_to.thread_id
+            ):
                 return render_template("404.html"), 404
 
         if thread.deleted:
@@ -429,7 +430,7 @@ def create_post(cat_title: str, thread_id: int):
             thread=thread,
             User=User,
             Post=Post,
-            reply_to=reply_to
+            reply_to=reply_to,
         )
 
     return render_template("401.html"), 401
@@ -453,8 +454,8 @@ def view_user(username: str):
 
             activities = sorted(
                 activities,
-                key=lambda activity: activity['data'].creation_date,
-                reverse=True
+                key=lambda activity: activity["data"].creation_date,
+                reverse=True,
             )
 
             return render_template(
@@ -475,8 +476,7 @@ def view_category(cat_title: str):
     category = Category.query.filter_by(title=cat_title).first()
 
     if category:
-        threads = Thread.query.filter_by(
-            cat_id=category.id, deleted=False).all()
+        threads = Thread.query.filter_by(cat_id=category.id, deleted=False).all()
 
         for thread in threads:
             thread.posts = []
@@ -496,7 +496,7 @@ def view_category(cat_title: str):
             category=category,
             threads=threads,
             User=User,
-            Post=Post
+            Post=Post,
         )
 
     return render_template("404.html"), 404
@@ -514,39 +514,45 @@ def view_thread(cat_title: str, thread_id: int):
             author = User.query.filter_by(id=post.author).first()
             category = Category.query.filter_by(id=post.cat_id).first()
 
-            author_post_count = len(
-                Post.query.filter_by(author=author.id).all())
-            author_profile_url = url_for(
-                "main.view_user", username=author.username)
+            author_post_count = len(Post.query.filter_by(author=author.id).all())
+            author_profile_url = url_for("main.view_user", username=author.username)
 
             if author.role == "user":
-                author_rendered_role = f"""<span style="color: lightgreen;">{
-                    author.role}</span>"""
+                author_rendered_role = (
+                    f"""<span style="color: lightgreen;">{author.role}</span>"""
+                )
             elif author.role == "moderator":
-                author_rendered_role = f"""<span style="color: yellow;">{
-                    author.role}</span>"""
+                author_rendered_role = (
+                    f"""<span style="color: yellow;">{author.role}</span>"""
+                )
             else:
-                author_rendered_role = f"""<span style="color: red;">{
-                    author.role}</span>"""
+                author_rendered_role = (
+                    f"""<span style="color: red;">{author.role}</span>"""
+                )
 
-            picture_url = url_for(
-                "main.uploads",
-                filename=author.picture_filename
-            ) if author.picture_filename else \
-                url_for(
-                "static",
-                filename="default.png"
+            picture_url = (
+                url_for("main.uploads", filename=author.picture_filename)
+                if author.picture_filename
+                else url_for("static", filename="default.png")
             )
-            post_url = url_for(
-                'main.view_thread',
-                cat_title=category.title,
-                thread_id=post.thread_id
-            ) + '#' + str(post.id)
-            reply_url = url_for(
-                'main.create_post',
-                cat_title=category.title,
-                thread_id=post.thread_id
-            ) + "?reply_to=" + str(post.id)
+            post_url = (
+                url_for(
+                    "main.view_thread",
+                    cat_title=category.title,
+                    thread_id=post.thread_id,
+                )
+                + "#"
+                + str(post.id)
+            )
+            reply_url = (
+                url_for(
+                    "main.create_post",
+                    cat_title=category.title,
+                    thread_id=post.thread_id,
+                )
+                + "?reply_to="
+                + str(post.id)
+            )
 
             if post.replying_to == parent_id:
                 html += f"""<div id="{post.id}" class="comment">
@@ -602,32 +608,32 @@ def view_thread(cat_title: str, thread_id: int):
 
                     if post.attachment_filename and not post.deleted:
                         html += f"""<p class="comment-tr">
-                        <a href="{url_for("main.uploads", filename=post.attachment_filename) +
-                                  "?download=true"}">[save]</a></p>"""
+                        <a href="{
+                            url_for("main.uploads", filename=post.attachment_filename)
+                            + "?download=true"
+                        }">[save]</a></p>"""
 
-                    if not post.deleted and (current_user.role == "admin" or
-                                             (
-                                                 current_user.role == "moderator" and
-                                                 author.role == "user"
-                                             ) or
-                                             current_user.id == post.author):
+                    if not post.deleted and (
+                        current_user.role == "admin"
+                        or (current_user.role == "moderator" and author.role == "user")
+                        or current_user.id == post.author
+                    ):
                         html += f"""<p class="comment-tr">
                                     <a href="{
                             url_for(
-                                'main.delete_post',
+                                "main.delete_post",
                                 cat_title=category.title,
                                 thread_id=post.thread_id,
-                                post_id=post.id
+                                post_id=post.id,
                             )
                         }">[delete]</a></p>"""
 
                 elif post.attachment_filename and not post.deleted:
                     html += f"""<p class="comment-tr">
                     <a href="{
-                        url_for(
-                            "main.uploads",
-                            filename=post.attachment_filename
-                        ) + "?download=true"}">[save]</a>
+                        url_for("main.uploads", filename=post.attachment_filename)
+                        + "?download=true"
+                    }">[save]</a>
                     </p>"""
 
                 html += "</div>"
@@ -639,7 +645,8 @@ def view_thread(cat_title: str, thread_id: int):
 
                 if post.content:
                     html += f"""<div class="comment-content">{
-                        render_content(post.content)}</div>"""
+                        render_content(post.content)
+                    }</div>"""
 
                 if post.attachment_filename and not post.deleted:
                     html += generate_file_embed(post.attachment_filename)
@@ -673,7 +680,7 @@ def view_thread(cat_title: str, thread_id: int):
                     thread=thread,
                     rendered_posts=rendered_posts,
                     User=User,
-                    Post=Post
+                    Post=Post,
                 )
 
     return render_template("404.html"), 404
@@ -689,8 +696,7 @@ def delete_user(username: str):
 
     if not user.deleted:
         if current_user.is_authenticated:
-            if current_user.role == "admin" or \
-                    current_user.id == user.id:
+            if current_user.role == "admin" or current_user.id == user.id:
                 if request.args.get("confirm") == "yes":
                     for post in posts:
                         if not post.deleted:
@@ -757,7 +763,7 @@ def delete_category(cat_title: str):
                     "delete-category.html",
                     category=category,
                     threads=threads,
-                    posts=posts
+                    posts=posts,
                 )
 
             return render_template("403.html"), 403
@@ -776,9 +782,11 @@ def delete_thread(cat_title: str, thread_id: int):
     if thread.cat_id == category.id:
         if not thread.deleted:
             if current_user.is_authenticated:
-                if current_user.role == "admin" or \
-                    (current_user.role == "moderator" and creator.role == "user") or \
-                        current_user.id == creator.id:
+                if (
+                    current_user.role == "admin"
+                    or (current_user.role == "moderator" and creator.role == "user")
+                    or current_user.id == creator.id
+                ):
                     if request.args.get("confirm") == "yes":
                         for post in Post.query.filter_by(thread_id=thread.id).all():
                             post.delete()
@@ -792,7 +800,7 @@ def delete_thread(cat_title: str, thread_id: int):
                             url_for(
                                 "main.view_thread",
                                 cat_title=category.title,
-                                thread_id=thread.id
+                                thread_id=thread.id,
                             )
                         )
 
@@ -800,7 +808,7 @@ def delete_thread(cat_title: str, thread_id: int):
                         "delete-thread.html",
                         category=category,
                         thread=thread,
-                        posts=Post.query.filter_by(thread_id=thread.id).all()
+                        posts=Post.query.filter_by(thread_id=thread.id).all(),
                     )
 
                 return render_template("403.html"), 403
@@ -820,9 +828,11 @@ def delete_post(cat_title: str, thread_id: int, post_id: int):
     if post.cat_id == category.id and post.thread_id == thread.id:
         if not post.deleted:
             if current_user.is_authenticated:
-                if current_user.role == "admin" or \
-                    (current_user.role == "moderator" and author.role == "user") or \
-                        current_user.id == author.id:
+                if (
+                    current_user.role == "admin"
+                    or (current_user.role == "moderator" and author.role == "user")
+                    or current_user.id == author.id
+                ):
                     if request.args.get("confirm") == "yes":
                         post.delete()
                         db.session.add(post)
@@ -832,8 +842,10 @@ def delete_post(cat_title: str, thread_id: int, post_id: int):
                             url_for(
                                 "main.view_thread",
                                 cat_title=category.title,
-                                thread_id=thread.id
-                            ) + '#' + str(post.id)
+                                thread_id=thread.id,
+                            )
+                            + "#"
+                            + str(post.id)
                         )
 
                     return render_template(
@@ -841,7 +853,7 @@ def delete_post(cat_title: str, thread_id: int, post_id: int):
                         category=category,
                         thread=thread,
                         post=post,
-                        author=author
+                        author=author,
                     )
 
                 return render_template("403.html"), 403
@@ -860,15 +872,11 @@ def uploads(filename: str):
         return send_from_directory(
             path.join(path.pardir, current_app.config["UPLOADS_DIRECTORY"]),
             filename,
-            as_attachment=True
+            as_attachment=True,
         )
 
     return send_from_directory(
-        path.join(
-            path.pardir,
-            current_app.config["UPLOADS_DIRECTORY"]
-        ),
-        filename
+        path.join(path.pardir, current_app.config["UPLOADS_DIRECTORY"]), filename
     )
 
 

@@ -1,41 +1,26 @@
-VENV = venv
-PYTHON = $(VENV)/bin/python3
-PIP = $(VENV)/bin/python3 -m pip
-FLASK = $(VENV)/bin/flask
-GUNICORN = $(VENV)/bin/gunicorn
-
-AUTOPEP8 = $(VENV)/bin/autopep8
-PYLINT = $(VENV)/bin/pylint
-ISORT = $(VENV)/bin/isort
-
 .PHONY: run debug setup fl lint format clean db-clean up-clean
 
 run:
-	$(GUNICORN) app:app
+	uv run gunicorn app:app
 
 debug:
-	$(FLASK) run --reload --debug
-
-setup: requirements.txt
-	python3 -m venv $(VENV)
-	$(PIP) install -r requirements.txt
+	uv run flask run --reload --debug
 
 fl: format lint
 
 lint:
-	$(PYLINT) -f colorized *.py thehouse/*.py
+	uv run ruff check
 
 format:
-	prettier -w thehouse/templates/*.html static/*.css
-	$(ISORT) *.py thehouse/*.py
-	$(AUTOPEP8) -i *.py thehouse/*.py
+	uv run prettier -w thehouse/templates/*.html static/*.css
+	uv run ruff format
 
 clean:
 	rm -rf __pycache__
-	rm -rf $(VENV)
+	rm -rf .venv
 
 db-setup:
-	$(PYTHON) setup_db.py
+	uv run setup_db.py
 
 db-clean: instance
 	rm -rf instance

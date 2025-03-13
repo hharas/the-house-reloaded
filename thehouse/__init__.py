@@ -9,10 +9,13 @@ from flask import Flask
 from .api_routes import api
 from .before_request_callbacks import logout_if_deleted, set_default_theme
 from .config import Config
-from .error_handlers import (api_handle_method_not_allowed,
-                             api_handle_server_error, handle_page_not_found,
-                             main_handle_method_not_allowed,
-                             main_handle_server_error)
+from .error_handlers import (
+    api_handle_method_not_allowed,
+    api_handle_server_error,
+    handle_page_not_found,
+    main_handle_method_not_allowed,
+    main_handle_server_error,
+)
 from .extensions import bcrypt, db, ma
 from .routes import main
 from .user_callbacks import login_manager
@@ -54,7 +57,7 @@ def create_app(config_class=Config):  # pylint: disable=unused-argument
     app.errorhandler(404)(handle_page_not_found)
     app.before_request(logout_if_deleted)
 
-    app.jinja_env.filters['render_content'] = render_content
+    app.jinja_env.filters["render_content"] = render_content
     app.jinja_env.globals.update(embed_file=generate_file_embed)
 
     return app, db
