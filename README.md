@@ -4,6 +4,8 @@ A python rewrite in flask of the original [The House](https://github.com/hharas/
 
 The House is an old-school social board in which users can participate in posting threads, commenting on threads and interacting with other users. THR is a reloaded version of the original website with multiple other features such as more profile customization and comment replies. THR has a [RESTful API](https://codeberg.org/haras/the-house-reloaded/wiki/API-Documentation) that can be used to make alternative clients. THR's web interface does not use any javascript.
 
+Source code is available on [Codeberg](https://codeberg.org/haras/the-house-reloaded) and [GitHub](https://github.com/hharas/the-house-reloaded).
+
 [![Homepage screenshot](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/home.png)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/home.png)
 
 [![Thread screenshot](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/thread.png)](https://codeberg.org/haras/the-house-reloaded/raw/branch/master/screenshots/thread.png)
@@ -41,6 +43,10 @@ To be implemented:
 - [ ] Ability to pin a thread
 - [ ] Banning users
 - [ ] Simple captcha for logins and registrations
+
+## Contributing
+
+You can always make a [pull request](https://codeberg.org/haras/the-house-reloaded/pulls) on Codeberg.
 
 ## License
 
