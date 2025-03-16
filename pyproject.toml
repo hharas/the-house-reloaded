@@ -5,7 +5,7 @@ description = "A python rewrite of the original The House board in PHP."
 authors = [{name = "Husayn Haras", email = "haras@disroot.org"}]
 maintainers = [{name = "Husayn Haras", email = "haras@disroot.org"}]
 readme = "README.md"
-license = "GPL-3.0-only"
+license = "AGPL-3.0-only"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
