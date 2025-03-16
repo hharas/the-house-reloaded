@@ -50,4 +50,4 @@ You can always make a [pull request](https://codeberg.org/haras/the-house-reload
 
 ## License
 
-The House Reloaded is licensed under the GNU General Public License V3.0.
+The House Reloaded is licensed under the GNU Affero General Public License V3.0.
